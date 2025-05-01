@@ -36,7 +36,7 @@ export default {
       {
         hid: "og:url",
         property: "og:url",
-        content: "https://iqsoptioncompany.com/",
+        content: "https://iqsoptionscompany.com/",
       },
       {
         hid: "og:title",

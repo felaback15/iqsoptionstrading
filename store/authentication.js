@@ -363,7 +363,7 @@ export const actions = {
         )
         commit('setLoading', { type: 'resolve', is: false })
         commit('setLoading', { type: 'login', is: false })
-        console.log(error.message)
+        console.log(error.message, ' is the error message')
       })
 
     function getReferralID (userId) {
@@ -425,7 +425,7 @@ export const actions = {
                     is: true,
                     type: 'error',
                     message:
-                      'Account blocked, Please contact support@iqsoptioncompany.online'
+                      'Account blocked, Please contact support@iqsoptionscompany.online'
                   },
                   { root: true }
                 )
@@ -455,6 +455,7 @@ export const actions = {
           { root: true }
         )
         commit('setLoading', { type: 'login', is: false })
+        console.log(error.message, ' is the error message')
       })
 
     function updateLastLogin (userID, date) {
@@ -1216,7 +1217,7 @@ export const actions = {
                     is: true,
                     type: 'error',
                     message:
-                      'Account blocked, Please contact support@iqsoptioncompany.online'
+                      'Account blocked, Please contact support@iqsoptionscompany.online'
                   },
                   { root: true }
                 )

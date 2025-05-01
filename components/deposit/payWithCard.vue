@@ -8,9 +8,9 @@
         >
           Contact
           <a
-            href="mailto:info@iqsoptioncompany.online"
+            href="mailto:info@iqsoptionscompany.online"
             class="secondary--text"
-          >info@iqsoptioncompany.online</a>
+          >info@iqsoptionscompany.online</a>
           for {{ paymentMethod }} payment
         </span>
         <span v-else class="text-caption info--text font-weight-medium">

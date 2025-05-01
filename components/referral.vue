@@ -25,7 +25,7 @@
           class="ml-2"
           @click="
             copy(
-              `https://iqsoptioncompany.com/register?ref=${
+              `https://iqsoptionscompany.online/register?ref=${
                 user && user.referralID
               }`
             )
@@ -37,7 +37,7 @@
           <span
             style="width: 50px"
             class="text-truncate"
-          >https://iqsoptioncompany.com/register?ref={{
+          >https://iqsoptionscompany.online/register?ref={{
             user && user.referralID
           }}</span>
         </v-btn>

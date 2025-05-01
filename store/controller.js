@@ -1,7 +1,6 @@
 import { auth, db, st } from '@/services/firebase'
 
 export const state = () => ({
-
   activePage: 'Home',
 
   loading: {
@@ -32,11 +31,9 @@ export const state = () => ({
   investments: [],
 
   currency: []
-
 })
 
 export const getters = {
-
   getState: state => (payload) => {
     return state[payload]
   },
@@ -52,7 +49,6 @@ export const getters = {
   getLoading (state) {
     return state.loading
   }
-
 }
 
 export const mutations = {
@@ -71,11 +67,10 @@ export const mutations = {
     state.loading.all = is
     state.loading[type] = is
   }
-
 }
 
 export const actions = {
-// Alert
+  // Alert
   initAlert ({ commit }, { is, type, timer, persistence, title, message }) {
     if (typeof persistence === 'undefined') {
       persistence = false
@@ -88,21 +83,20 @@ export const actions = {
 
   async initCurrency ({ commit }) {
     commit('setLoading', { type: 'currency', is: true })
-    await db.collection('currency')
-      .onSnapshot((snapshot) => {
-        const currency = []
-        const data = snapshot.docs
-        // console.log(data)
-        data.forEach((doc) => {
-          // get setting detail
-          const arr = doc.data()
-          currency.push(arr)
-        })
-
-        console.log(currency)
-        commit('setState', { type: 'currency', value: currency })
-        commit('setLoading', { type: 'currency', is: false })
+    await db.collection('currency').onSnapshot((snapshot) => {
+      const currency = []
+      const data = snapshot.docs
+      // console.log(data)
+      data.forEach((doc) => {
+        // get setting detail
+        const arr = doc.data()
+        currency.push(arr)
       })
+
+      console.log(currency, ' is the list of currencies')
+      commit('setState', { type: 'currency', value: currency })
+      commit('setLoading', { type: 'currency', is: false })
+    })
   },
 
   // Loan Application
@@ -112,26 +106,41 @@ export const actions = {
     const ref = db.collection('loans')
     payload.userID = userID
 
-    await ref.add(payload).then((docRef) => {
-      // update the loan ID
-      commit('setState', { type: 'loanID', value: docRef.id })
-      ref.doc(docRef.id).update({
-        loanID: docRef.id
+    await ref
+      .add(payload)
+      .then((docRef) => {
+        // update the loan ID
+        commit('setState', { type: 'loanID', value: docRef.id })
+        ref.doc(docRef.id).update({
+          loanID: docRef.id
+        })
+        console.log('loan submited')
+        // Transaction details
+        const user = rootState.authentication.user
+        payload.purpose = `Applied for loan of ${
+          user.symbol
+        }${payload.amount.toLocaleString()}`
+        payload.type = 'loan'
+        payload.ID = docRef.id
+        const transaction = payload
+        dispatch('transactions', transaction)
+        dispatch('initAlert', {
+          is: true,
+          type: 'success',
+          persistence: true,
+          message: 'Loan application submitted successful and under review'
+        })
+        commit('setLoading', { type: 'loan', is: false })
       })
-      console.log('loan submited')
-      // Transaction details
-      const user = rootState.authentication.user
-      payload.purpose = `Applied for loan of ${user.symbol}${(payload.amount).toLocaleString()}`
-      payload.type = 'loan'
-      payload.ID = docRef.id
-      const transaction = payload
-      dispatch('transactions', transaction)
-      dispatch('initAlert', { is: true, type: 'success', persistence: true, message: 'Loan application submitted successful and under review' })
-      commit('setLoading', { type: 'loan', is: false })
-    }).catch((error) => {
-      dispatch('initAlert', { is: true, type: 'error', persistence: true, message: error.message })
-      commit('setLoading', { type: 'loan', is: false })
-    })
+      .catch((error) => {
+        dispatch('initAlert', {
+          is: true,
+          type: 'error',
+          persistence: true,
+          message: error.message
+        })
+        commit('setLoading', { type: 'loan', is: false })
+      })
   },
 
   // Fund Transfer
@@ -141,30 +150,47 @@ export const actions = {
     const ref = db.collection('transfers')
     payload.userID = userID
 
-    await ref.add(payload).then((docRef) => {
-      // update the transferID
-      commit('setState', { type: 'transferID', value: docRef.id })
-      ref.doc(docRef.id).update({
-        transferID: docRef.id
+    await ref
+      .add(payload)
+      .then((docRef) => {
+        // update the transferID
+        commit('setState', { type: 'transferID', value: docRef.id })
+        ref.doc(docRef.id).update({
+          transferID: docRef.id
+        })
+        console.log('transfer submited')
+        // Transaction details
+        const user = rootState.authentication.user
+        payload.purpose = `Applied for transfer of ${
+          user.symbol
+        }${payload.beneficiary.amount.toLocaleString()} to ${
+          payload.beneficiary.firstName
+        } ${payload.beneficiary.lastName}`
+        payload.type = 'transfer'
+        payload.ID = docRef.id
+        const transaction = payload
+        dispatch('transactions', transaction)
+
+        // Deduct Balance
+        dispatch('deductBalance', payload.beneficiary.amount)
+
+        dispatch('initAlert', {
+          is: true,
+          type: 'success',
+          persistence: true,
+          message: 'Fund Transfer  submitted successful and under review'
+        })
+        commit('setLoading', { type: 'transfer', is: false })
       })
-      console.log('transfer submited')
-      // Transaction details
-      const user = rootState.authentication.user
-      payload.purpose = `Applied for transfer of ${user.symbol}${(payload.beneficiary.amount).toLocaleString()} to ${payload.beneficiary.firstName} ${payload.beneficiary.lastName}`
-      payload.type = 'transfer'
-      payload.ID = docRef.id
-      const transaction = payload
-      dispatch('transactions', transaction)
-
-      // Deduct Balance
-      dispatch('deductBalance', payload.beneficiary.amount)
-
-      dispatch('initAlert', { is: true, type: 'success', persistence: true, message: 'Fund Transfer  submitted successful and under review' })
-      commit('setLoading', { type: 'transfer', is: false })
-    }).catch((error) => {
-      commit('setLoading', { type: 'transfer', is: false })
-      dispatch('initAlert', { is: true, type: 'error', persistence: true, message: error.message })
-    })
+      .catch((error) => {
+        commit('setLoading', { type: 'transfer', is: false })
+        dispatch('initAlert', {
+          is: true,
+          type: 'error',
+          persistence: true,
+          message: error.message
+        })
+      })
   },
 
   async deductBalance ({ rootState, dispatch }, { amount, wallet }) {
@@ -180,12 +206,21 @@ export const actions = {
     // update user in database
     const ref = db.collection('users')
 
-    await ref.doc(userID).update(user).then(() => {
-      console.log(`${amount} Debited from ${wallet} was successful`)
-    }).catch((error) => {
-      console.log(error.message)
-      dispatch('initAlert', { is: true, type: 'error', persistence: true, message: error.message })
-    })
+    await ref
+      .doc(userID)
+      .update(user)
+      .then(() => {
+        console.log(`${amount} Debited from ${wallet} was successful`)
+      })
+      .catch((error) => {
+        console.log(error.message)
+        dispatch('initAlert', {
+          is: true,
+          type: 'error',
+          persistence: true,
+          message: error.message
+        })
+      })
   },
 
   async topBalance ({ rootState, dispatch }, { amount, wallet }) {
@@ -201,12 +236,21 @@ export const actions = {
     // update user in database
     const ref = db.collection('users')
 
-    await ref.doc(userID).update(user).then(() => {
-      console.log(`${amount} Credited to ${wallet} was successful`)
-    }).catch((error) => {
-      console.log(error.message)
-      dispatch('initAlert', { is: true, type: 'error', persistence: true, message: error.message })
-    })
+    await ref
+      .doc(userID)
+      .update(user)
+      .then(() => {
+        console.log(`${amount} Credited to ${wallet} was successful`)
+      })
+      .catch((error) => {
+        console.log(error.message)
+        dispatch('initAlert', {
+          is: true,
+          type: 'error',
+          persistence: true,
+          message: error.message
+        })
+      })
   },
 
   // Transactions
@@ -217,33 +261,42 @@ export const actions = {
     payload.updated = false
     payload.balance = rootState.authentication.user.wallet.deposit
     console.log(payload.balance)
-    await ref.add(payload).then((docRef) => {
-      // update the transaction ID
-      commit('setState', { type: 'transactionID', value: docRef.id })
-      ref.doc(docRef.id).update({
-        transactionID: docRef.id
-      })
+    await ref
+      .add(payload)
+      .then((docRef) => {
+        // update the transaction ID
+        commit('setState', { type: 'transactionID', value: docRef.id })
+        ref.doc(docRef.id).update({
+          transactionID: docRef.id
+        })
 
-      const types = {
-        deposit: 'deposit',
-        loan: 'loans',
-        withdraw: 'withdraw',
-        transfer: 'transfers'
-      }
+        const types = {
+          deposit: 'deposit',
+          loan: 'loans',
+          withdraw: 'withdraw',
+          transfer: 'transfers'
+        }
 
-      db.collection(types[payload.type]).doc(payload.ID).update({
-        transactionID: docRef.id
+        db.collection(types[payload.type]).doc(payload.ID).update({
+          transactionID: docRef.id
+        })
+        console.log('transaction submited')
       })
-      console.log('transaction submited')
-    }).catch((error) => {
-      dispatch('initAlert', { is: true, type: 'error', persistence: true, message: error.message })
-    })
+      .catch((error) => {
+        dispatch('initAlert', {
+          is: true,
+          type: 'error',
+          persistence: true,
+          message: error.message
+        })
+      })
   },
 
   async initTransactions ({ commit }) {
     commit('setLoading', { type: 'transaction', is: true })
     const userID = auth.currentUser.uid
-    await db.collection('transactions')
+    await db
+      .collection('transactions')
       .where('userID', '==', userID)
       .onSnapshot((snapshot) => {
         const transactions = []
@@ -267,29 +320,46 @@ export const actions = {
     const userID = auth.currentUser.uid
     const ref = db.collection('investments')
     payload.userID = userID
-    await ref.add(payload).then((docRef) => {
-      // update the loan ID
-      commit('setState', { type: 'investmentID', value: docRef.id })
-      ref.doc(docRef.id).update({
-        investmentID: docRef.id
+    await ref
+      .add(payload)
+      .then((docRef) => {
+        // update the loan ID
+        commit('setState', { type: 'investmentID', value: docRef.id })
+        ref.doc(docRef.id).update({
+          investmentID: docRef.id
+        })
+
+        // Deduct Amount from Balance
+        dispatch('deductBalance', {
+          amount: payload.amount,
+          wallet: 'deposit'
+        })
+
+        console.log('Investment submited')
+        dispatch('initAlert', {
+          is: true,
+          type: 'success',
+          persistence: true,
+          message: 'Transaction was successful'
+        })
+        commit('setLoading', { type: 'investment', is: false })
       })
-
-      // Deduct Amount from Balance
-      dispatch('deductBalance', { amount: payload.amount, wallet: 'deposit' })
-
-      console.log('Investment submited')
-      dispatch('initAlert', { is: true, type: 'success', persistence: true, message: 'Transaction was successful' })
-      commit('setLoading', { type: 'investment', is: false })
-    }).catch((error) => {
-      dispatch('initAlert', { is: true, type: 'error', persistence: true, message: error.message })
-      commit('setLoading', { type: 'investment', is: false })
-    })
+      .catch((error) => {
+        dispatch('initAlert', {
+          is: true,
+          type: 'error',
+          persistence: true,
+          message: error.message
+        })
+        commit('setLoading', { type: 'investment', is: false })
+      })
   },
 
   async initInvestments ({ commit }) {
     commit('setLoading', { type: 'investment', is: true })
     const userID = auth.currentUser.uid
-    await db.collection('investments')
+    await db
+      .collection('investments')
       .where('userID', '==', userID)
       .onSnapshot((snapshot) => {
         const investments = []
@@ -317,15 +387,19 @@ export const actions = {
       const today = getDate('current')
       console.log(today)
       if (today === el.maturityDate) {
-        db.collection('investments').doc(el.investmentID).update({
-          status: 'completed'
-        }).then(() => {
-          console.log('Investment Completed')
-          // Notify user and admin
-        }).catch((error) => {
-          // dispatch('initAlert', { is: true, type: 'error', persistence:true, message: error.message })
-          console.log(error.message)
-        })
+        db.collection('investments')
+          .doc(el.investmentID)
+          .update({
+            status: 'completed'
+          })
+          .then(() => {
+            console.log('Investment Completed')
+            // Notify user and admin
+          })
+          .catch((error) => {
+            // dispatch('initAlert', { is: true, type: 'error', persistence:true, message: error.message })
+            console.log(error.message)
+          })
       }
     })
 
@@ -340,9 +414,23 @@ export const actions = {
       }
 
       function formatDate (date) {
-        const months = ['January', 'February', 'March', 'April', 'May', 'June',
-          'July', 'August', 'September', 'October', 'November', 'December']
-        return `${date.getDate()} ${months[date.getMonth()]}, ${date.getFullYear()}`
+        const months = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December'
+        ]
+        return `${date.getDate()} ${
+          months[date.getMonth()]
+        }, ${date.getFullYear()}`
       }
 
       if (get === 'add') {
@@ -359,30 +447,48 @@ export const actions = {
     const userID = auth.currentUser.uid
     const ref = db.collection('withdraw')
     payload.userID = userID
-    await ref.add(payload).then((docRef) => {
-      // update the loan ID
-      commit('setState', { type: 'withdrawID', value: docRef.id })
-      ref.doc(docRef.id).update({
-        withdrawID: docRef.id
+    await ref
+      .add(payload)
+      .then((docRef) => {
+        // update the loan ID
+        commit('setState', { type: 'withdrawID', value: docRef.id })
+        ref.doc(docRef.id).update({
+          withdrawID: docRef.id
+        })
+        console.log('Withdrawal submited')
+
+        // Deduct Amount from Profit
+        dispatch('deductBalance', {
+          amount: payload.amount,
+          wallet: 'earnings'
+        })
+
+        // Transaction details
+        const user = rootState.authentication.user
+        payload.purpose = `Withdrawal request of ${
+          user.symbol
+        }${payload.amount.toLocaleString()}`
+        payload.type = 'withdraw'
+        payload.ID = docRef.id
+        const transaction = payload
+        dispatch('transactions', transaction)
+        dispatch('initAlert', {
+          is: true,
+          type: 'success',
+          persistence: true,
+          message: 'Withdrawal request submitted successful and under review'
+        })
+        commit('setLoading', { type: 'withdraw', is: false })
       })
-      console.log('Withdrawal submited')
-
-      // Deduct Amount from Profit
-      dispatch('deductBalance', { amount: payload.amount, wallet: 'earnings' })
-
-      // Transaction details
-      const user = rootState.authentication.user
-      payload.purpose = `Withdrawal request of ${user.symbol}${(payload.amount).toLocaleString()}`
-      payload.type = 'withdraw'
-      payload.ID = docRef.id
-      const transaction = payload
-      dispatch('transactions', transaction)
-      dispatch('initAlert', { is: true, type: 'success', persistence: true, message: 'Withdrawal request submitted successful and under review' })
-      commit('setLoading', { type: 'withdraw', is: false })
-    }).catch((error) => {
-      dispatch('initAlert', { is: true, type: 'error', persistence: true, message: error.message })
-      commit('setLoading', { type: 'withdraw', is: false })
-    })
+      .catch((error) => {
+        dispatch('initAlert', {
+          is: true,
+          type: 'error',
+          persistence: true,
+          message: error.message
+        })
+        commit('setLoading', { type: 'withdraw', is: false })
+      })
   },
   // Submit Proof of Payment
   async submitProof ({ commit, rootState, dispatch }, data) {
@@ -391,28 +497,43 @@ export const actions = {
     const userID = auth.currentUser.uid
     const ref = db.collection('deposit')
     payload.userID = userID
-    await ref.add(payload).then((docRef) => {
-      // update the loan ID
-      commit('setState', { type: 'depositID', value: docRef.id })
-      ref.doc(docRef.id).update({
-        depositID: docRef.id
+    await ref
+      .add(payload)
+      .then((docRef) => {
+        // update the loan ID
+        commit('setState', { type: 'depositID', value: docRef.id })
+        ref.doc(docRef.id).update({
+          depositID: docRef.id
+        })
+        console.log('Deposit submited')
+        // Upload Proof
+        dispatch('uploadPhoto', data)
+        // Transaction details
+        const user = rootState.authentication.user
+        payload.purpose = `Sent proof of payment of ${
+          user.symbol
+        }${payload.amount.toLocaleString()}`
+        payload.type = 'deposit'
+        payload.ID = docRef.id
+        const transaction = payload
+        dispatch('transactions', transaction)
+        dispatch('initAlert', {
+          is: true,
+          type: 'success',
+          persistence: true,
+          message: 'Proof of payment submitted successful and under review'
+        })
+        commit('setLoading', { type: 'deposit', is: false })
       })
-      console.log('Deposit submited')
-      // Upload Proof
-      dispatch('uploadPhoto', data)
-      // Transaction details
-      const user = rootState.authentication.user
-      payload.purpose = `Sent proof of payment of ${user.symbol}${(payload.amount).toLocaleString()}`
-      payload.type = 'deposit'
-      payload.ID = docRef.id
-      const transaction = payload
-      dispatch('transactions', transaction)
-      dispatch('initAlert', { is: true, type: 'success', persistence: true, message: 'Proof of payment submitted successful and under review' })
-      commit('setLoading', { type: 'deposit', is: false })
-    }).catch((error) => {
-      dispatch('initAlert', { is: true, type: 'error', persistence: true, message: error.message })
-      commit('setLoading', { type: 'deposit', is: false })
-    })
+      .catch((error) => {
+        dispatch('initAlert', {
+          is: true,
+          type: 'error',
+          persistence: true,
+          message: error.message
+        })
+        commit('setLoading', { type: 'deposit', is: false })
+      })
   },
 
   async uploadPhoto ({ dispatch, state }, payload) {
@@ -424,7 +545,8 @@ export const actions = {
     const filename = photo.name
     const ext = filename.slice(filename.lastIndexOf('.'))
 
-    await st.ref(`reciept/${ID}${ext}`)
+    await st
+      .ref(`reciept/${ID}${ext}`)
       .put(photo)
       .then((res) => {
         // console.log('start download')
@@ -433,24 +555,39 @@ export const actions = {
           .then((url) => {
             recieptURL = url
             // update photo in the database
-            ref.update({
-              photoURL: recieptURL
-            }).then(function () {
-              console.log('Deposit updated')
-            })
+            ref
+              .update({
+                photoURL: recieptURL
+              })
+              .then(function () {
+                console.log('Deposit updated')
+              })
               .catch(function (error) {
                 // The document probably doesn't exist.
                 console.log(error.message)
-                dispatch('controller/initAlert', { is: true, type: 'error', message: error.message }, { root: true })
+                dispatch(
+                  'controller/initAlert',
+                  { is: true, type: 'error', message: error.message },
+                  { root: true }
+                )
               })
           })
           .catch((error) => {
             console.log(error.message)
-            dispatch('controller/initAlert', { is: true, type: 'error', message: error.message }, { root: true })
+            dispatch(
+              'controller/initAlert',
+              { is: true, type: 'error', message: error.message },
+              { root: true }
+            )
           })
-      }).catch((err) => {
+      })
+      .catch((err) => {
         console.log(err)
-        dispatch('controller/initAlert', { is: true, type: 'error', message: err.message }, { root: true })
+        dispatch(
+          'controller/initAlert',
+          { is: true, type: 'error', message: err.message },
+          { root: true }
+        )
       })
   },
 
@@ -460,7 +597,8 @@ export const actions = {
     await dispatch('initInvestments')
     await dispatch('investmentCrone')
     await dispatch('initCurrency')
-    await dispatch('authentication/initializeVerification', null, { root: true })
+    await dispatch('authentication/initializeVerification', null, {
+      root: true
+    })
   }
-
 }

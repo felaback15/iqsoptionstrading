@@ -139,7 +139,7 @@
                       />
                     </v-col> -->
 
-                    <v-col cols="6" class="py-0">
+                    <v-col cols="12" class="py-0">
                       <v-autocomplete
                         v-model="country"
                         :items="countries"
@@ -153,7 +153,7 @@
                         :rules="[(v) => !!v || 'Nationality is required']"
                       />
                     </v-col>
-                    <v-col cols="6" class="py-0">
+                    <v-col cols="12" class="py-0">
                       <v-select
                         v-model="currency"
                         dense
@@ -222,13 +222,7 @@
                         block
                         :loading="loading.register"
                         color="secondary"
-                        class="
-                          text-capitalize
-                          mx-1
-                          rounded
-                          text-subtitle-2
-                          font-weight-regular
-                        "
+                        class="text-capitalize mx-1 rounded text-subtitle-2 font-weight-regular"
                       >
                         Create Account
                       </v-btn>
@@ -295,6 +289,11 @@ export default {
   created () {
     this.refCode = this.$route.query.ref
     console.log(this.$route.query.ref)
+
+    this.$store
+      .dispatch('controller/initCurrency')
+      .then(() => console.log('Done'))
+      .catch(err => console.log(err, ' is the error'))
   },
 
   computed: {

@@ -217,14 +217,14 @@
           </div>
           <div>
             <v-btn
-              href="mailto:info@iqsoptioncompany.online"
+              href="mailto:info@iqsoptionscompany.online"
               text
               class="text-lowercase font-weight-light text-subtitle-1 px-1"
             >
               <v-icon left size="20" color="primary">
                 mdi-email
               </v-icon>
-              info@iqsoptioncompany.online
+              info@iqsoptionscompany.online
             </v-btn>
           </div>
           <div class="primary--text mt-4">
@@ -353,9 +353,6 @@ export default {
     }
   },
 
-  created () {
-    this.$store.dispatch('controller/initCurrency')
-  },
   mounted () {
     window.addEventListener('scroll', this.updateScroll)
   },

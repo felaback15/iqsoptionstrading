@@ -41,53 +41,53 @@
 </template>
 
 <script>
-import pPattern from "./pPattern.vue";
+import pPattern from './pPattern.vue'
 export default {
   components: { pPattern },
   filters: {
-    currency(val) {
+    currency (val) {
       if (val) {
-        val = parseFloat(val);
-        return val.toLocaleString("en-NG", {
-          style: "currency",
-          code: "NG",
-          currency: "NGN",
-        });
+        val = parseFloat(val)
+        return val.toLocaleString('en-NG', {
+          style: 'currency',
+          code: 'NG',
+          currency: 'NGN'
+        })
       } else {
       }
-    },
+    }
   },
   props: {
     name: {
       type: String,
-      default: "",
+      default: ''
     },
     icon: {
       type: String,
-      default: "",
+      default: ''
     },
     amount: {
       type: Number,
-      default: 0,
+      default: 0
     },
     iconColor: {
       type: String,
-      default: "",
+      default: ''
     },
     color: {
       type: String,
-      default: "orange",
+      default: 'orange'
     },
     to: {
       type: String,
-      default: "#",
+      default: '#'
     },
     loading: {
       type: Boolean,
-      default: true,
-    },
-  },
-};
+      default: true
+    }
+  }
+}
 </script>
 
 <style>

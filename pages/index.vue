@@ -570,7 +570,7 @@
           target="_blank"
           class="mt-n4"
           left
-          href="mailto:info@iqsoptioncompany.online"
+          href="mailto:info@iqsoptionscompany.online"
           fab
         >
           <v-icon> mdi-email </v-icon>
@@ -868,7 +868,7 @@ export default {
         {
           hid: 'og:url',
           property: 'og:url',
-          content: 'https://iqsoptioncompany.com/'
+          content: 'https://iqsoptionscompany.com/'
         },
         {
           hid: 'og:title',
