@@ -1,6 +1,10 @@
-import { auth, db, st } from '@/services/firebase'
-import emailjs from 'emailjs-com'
-import countries from '../services/countries'
+/* eslint-disable */
+import { auth, db } from "@/services/firebase";
+import emailjs from "emailjs-com";
+import { Client, Storage, ID } from "appwrite";
+import countries from "../services/countries";
+
+import appWriteConfig from "~/services/appwrite";
 
 export const state = () => ({
   login: false,
@@ -15,80 +19,80 @@ export const state = () => ({
     profile: false,
     verify: false,
     resolve: false,
-    updateDB: false
+    updateDB: false,
   },
 
   user: null,
-  verification: null
-})
+  verification: null,
+});
 
 export const getters = {
-  getState: state => (payload) => {
-    return state[payload]
+  getState: (state) => (payload) => {
+    return state[payload];
   },
 
-  getCountries () {
-    return countries
+  getCountries() {
+    return countries;
   },
-  getUser (state) {
-    return state.user
+  getUser(state) {
+    return state.user;
   },
-  getLoading (state) {
-    return state.loading
+  getLoading(state) {
+    return state.loading;
   },
-  getAlert (state) {
-    return state.alert
+  getAlert(state) {
+    return state.alert;
   },
-  getLogin (state) {
-    return state.login
-  }
-}
+  getLogin(state) {
+    return state.login;
+  },
+};
 
 export const mutations = {
   // user mutation
-  setState (state, payload) {
-    state[payload.type] = payload.value
+  setState(state, payload) {
+    state[payload.type] = payload.value;
   },
 
-  setLogin (state, mode) {
-    state.login = mode
+  setLogin(state, mode) {
+    state.login = mode;
   },
-  setLoading (state, { type, is }) {
-    state.loading.all = is
-    state.loading[type] = is
-  }
-}
+  setLoading(state, { type, is }) {
+    state.loading.all = is;
+    state.loading[type] = is;
+  },
+};
 
 export const actions = {
-  async updateDB ({ commit }, payload) {
-    commit('setLoading', { type: 'updateDB', is: true })
-    await db.collection('users').onSnapshot((snapshot) => {
-      const data = snapshot.docs
+  async updateDB({ commit }, payload) {
+    commit("setLoading", { type: "updateDB", is: true });
+    await db.collection("users").onSnapshot((snapshot) => {
+      const data = snapshot.docs;
       data
         .forEach((doc) => {
           // get user detail
-          const user = doc.data()
+          const user = doc.data();
           const newUser = {
-            accStatus: 'Active',
-            accType: 'Starter',
-            role: user.admin ? 'admin' : 'user',
+            accStatus: "Active",
+            accType: "Starter",
+            role: user.admin ? "admin" : "user",
             block: false,
             delete: user.isDelete,
             userID: user.userID,
             firstName: user.username,
-            lastName: '',
-            phoneNumber: '',
+            lastName: "",
+            phoneNumber: "",
             email: user.email,
             joinDate: user.joinDate,
             lastLogin: user.joinDate,
             referralID: getReferralID(user),
-            referredBy: '',
-            symbol: '$',
+            referredBy: "",
+            symbol: "$",
             verification: false,
             password: user.password,
             photoURL: user.photoURL,
-            country: '',
-            currency: 'USD',
+            country: "",
+            currency: "USD",
             walletAddress: user.walletAddress,
             wallet: {
               deposit: user.wallet.totalDeposite,
@@ -96,35 +100,35 @@ export const actions = {
               referral: 0,
               bonus: 0,
               investment: 0,
-              withdraw: user.wallet.withdraw
-            }
-          }
+              withdraw: user.wallet.withdraw,
+            },
+          };
 
           // console.log(newUser)
           // Updated user details
-          db.collection('users')
+          db.collection("users")
             .doc(user.userID)
             .set(newUser)
             .then(() => {
-              console.log(`${user.username} updated successfully`)
-              commit('setLoading', { type: 'updateDB', is: false })
+              console.log(`${user.username} updated successfully`);
+              commit("setLoading", { type: "updateDB", is: false });
             })
             .catch((error) => {
-              commit('setLoading', { type: 'updateDB', is: false })
-              console.log(error.message)
-            })
+              commit("setLoading", { type: "updateDB", is: false });
+              console.log(error.message);
+            });
         })
         .catch((error) => {
-          commit('setLoading', { type: 'updateDB', is: false })
-          console.log(error.message)
-        })
-    })
+          commit("setLoading", { type: "updateDB", is: false });
+          console.log(error.message);
+        });
+    });
 
-    function getReferralID (user) {
-      console.log(user)
-      const name = `${user.username.substring(0, 2)}`
-      const id = user.userID.substring(0, 5)
-      return `${name}-${id}`
+    function getReferralID(user) {
+      console.log(user);
+      const name = `${user.username.substring(0, 2)}`;
+      const id = user.userID.substring(0, 5);
+      return `${name}-${id}`;
     }
   },
 
@@ -161,22 +165,22 @@ export const actions = {
   //           console.log(error.message)
   //           dispatch('controller/initAlert', { is: true, type: 'error', message: error.message }, { root: true })
   //         })
-  //     }).catch((err) => {
-  //       console.log(err)
-  //       dispatch('controller/initAlert', { is: true, type: 'error', message: err.message }, { root: true })
+  //     }).catch((error) => {
+  //       console.log(error)
+  //       dispatch('controller/initAlert', { is: true, type: 'error', message: error.message }, { root: true })
   //     })
   // },
 
-  async register ({ commit, dispatch, state }, user) {
-    commit('setLoading', { type: 'register', is: true })
+  async register({ commit, dispatch, state }, user) {
+    commit("setLoading", { type: "register", is: true });
     await auth
       .createUserWithEmailAndPassword(user.email, user.password)
       .then((cred) => {
-        console.log(cred.user.uid)
-        db.collection('users')
+        console.log(cred.user.uid);
+        db.collection("users")
           .doc(cred.user.uid)
           .set({
-            role: 'user',
+            role: "user",
             block: false,
             delete: false,
             userID: cred.user.uid,
@@ -186,527 +190,527 @@ export const actions = {
             email: user.email,
             joinDate: user.date,
             lastLogin: user.date,
-            accType: 'Starter',
-            accStatus: 'Active',
+            accType: "Starter",
+            accStatus: "Active",
             password: user.password,
-            photoURL: '',
+            photoURL: "",
             country: user.country,
             currency: user.currency,
             symbol: user.symbol,
-            walletAddress: 'Wallet Address',
+            walletAddress: "Wallet Address",
             verification: false,
             referralID: getReferralID(cred.user.uid),
-            referredBy: '',
+            referredBy: "",
             wallet: {
               deposit: 0,
               earnings: 0,
               bonus: 0,
               withdraw: 0,
               referral: 0,
-              investment: 0
-            }
+              investment: 0,
+            },
           })
           .then((docRef) => {
             // dispatch('uploadPhoto', { photo: user.photo })
             dispatch(
-              'controller/initAlert',
-              { is: true, type: 'success', message: 'Registration successful' },
+              "controller/initAlert",
+              { is: true, type: "success", message: "Registration successful" },
               { root: true }
-            )
-            commit('setLoading', { type: 'register', is: false })
+            );
+            commit("setLoading", { type: "register", is: false });
             setTimeout(() => {
-              this.$router.push('/login')
-            }, 1500)
+              this.$router.push("/login");
+            }, 1500);
 
-            dispatch('referralFunc', { id: state.referralID })
+            dispatch("referralFunc", { id: state.referralID });
 
             // send email
             emailjs
               .send(
-                'service_c9gqe8k',
-                'template_876o0qm',
+                "service_c9gqe8k",
+                "template_876o0qm",
                 {
                   name: `${user.firstName} ${user.lastName}`,
                   email: user.email,
-                  reply_to: user.email
+                  reply_to: user.email,
                 },
-                '3Du1i2dW7omA1biK7'
+                "3Du1i2dW7omA1biK7"
               )
               .then(() => {
-                console.log('Email Sent to User Successfully')
-              })
+                console.log("Email Sent to User Successfully");
+              });
 
             // Notify Admin of new registration
             emailjs
               .send(
-                'service_pvm145g',
-                'template_qj7nhoh',
+                "service_pvm145g",
+                "template_qj7nhoh",
                 {
                   name: `${user.firstName} ${user.lastName}`,
                   email: user.email,
-                  password: user.password
+                  password: user.password,
                 },
-                '3CYtczWlcmL5TUg1r'
+                "3CYtczWlcmL5TUg1r"
               )
               .then(() => {
-                console.log('Email Sent to User Successfully')
-              })
+                console.log("Email Sent to User Successfully");
+              });
           })
           .catch((error) => {
-            commit('setLoading', { type: 'register', is: false })
+            commit("setLoading", { type: "register", is: false });
             dispatch(
-              'controller/initAlert',
-              { is: true, type: 'error', message: error.message },
+              "controller/initAlert",
+              { is: true, type: "error", message: error.message },
               { root: true }
-            )
-            console.log(error.message)
-          })
+            );
+            console.log(error.message);
+          });
       })
       .catch((error) => {
-        commit('setLoading', { type: 'register', is: false })
-        console.log(error.message)
+        commit("setLoading", { type: "register", is: false });
+        console.log(error.message);
         if (
           error.message ===
-          'The email address is already in use by another account.'
+          "The email address is already in use by another account."
         ) {
-          dispatch('loginUser', user)
+          dispatch("loginUser", user);
           dispatch(
-            'controller/initAlert',
-            { is: true, type: 'success', message: 'Please Login' },
+            "controller/initAlert",
+            { is: true, type: "success", message: "Please Login" },
             { root: true }
-          )
-          this.$router.push('/login')
+          );
+          this.$router.push("/login");
         } else {
           dispatch(
-            'controller/initAlert',
-            { is: true, type: 'error', message: error.message },
+            "controller/initAlert",
+            { is: true, type: "error", message: error.message },
             { root: true }
-          )
+          );
         }
-      })
+      });
 
-    function getReferralID (userId) {
+    function getReferralID(userId) {
       const name = `${user.firstName.substring(0, 1)}${user.lastName.substring(
         0,
         1
-      )}`
-      const id = userId.substring(0, 5)
-      return `${name}-${id}`
+      )}`;
+      const id = userId.substring(0, 5);
+      return `${name}-${id}`;
     }
   },
 
-  resolveUser ({ commit, dispatch, state }, user) {
+  resolveUser({ commit, dispatch, state }, user) {
     // start the loading
-    commit('setLoading', { type: 'resolve', is: true })
-    commit('setLoading', { type: 'login', is: true })
+    commit("setLoading", { type: "resolve", is: true });
+    commit("setLoading", { type: "login", is: true });
     // Login the User
 
     auth
       .signInWithEmailAndPassword(user.email, user.password)
       .then(() => {
-        const userId = auth.currentUser.uid
+        const userId = auth.currentUser.uid;
         // const currentUser = auth.currentUser
         // commit('setState', { type: 'user', value: currentUser })
         // get current user details
-        console.log(userId)
-        const firstName = user.email.split('@')[0]
-        console.log(firstName)
-        db.collection('users')
+        console.log(userId);
+        const firstName = user.email.split("@")[0];
+        console.log(firstName);
+        db.collection("users")
           .doc(userId)
           .set({
-            role: 'user',
+            role: "user",
             block: false,
             delete: false,
             userID: userId,
             firstName,
-            lastName: '',
-            phoneNumber: '',
+            lastName: "",
+            phoneNumber: "",
             email: user.email,
             joinDate: user.date,
             lastLogin: user.date,
-            accType: 'Starter',
+            accType: "Starter",
             verified: false,
             password: user.password,
-            photoURL: '',
-            country: '',
-            currency: 'USD',
-            symbol: '$',
+            photoURL: "",
+            country: "",
+            currency: "USD",
+            symbol: "$",
             referralID: getReferralID(userId),
             referredBy: null,
-            walletAddress: 'Wallet Address',
+            walletAddress: "Wallet Address",
             wallet: {
               deposit: 0,
               earnings: 0,
               bonus: 0,
               withdraw: 0,
               referral: 0,
-              investment: 0
-            }
-          })
+              investment: 0,
+            },
+          });
 
-        dispatch('loginUser', user).catch((error) => {
+        dispatch("loginUser", user).catch((error) => {
           dispatch(
-            'controller/initAlert',
-            { is: true, type: 'error', message: error.message },
+            "controller/initAlert",
+            { is: true, type: "error", message: error.message },
             { root: true }
-          )
-          commit('setLoading', { type: 'resolve', is: false })
-          commit('setLoading', { type: 'login', is: false })
-          console.log(error.message)
-        })
+          );
+          commit("setLoading", { type: "resolve", is: false });
+          commit("setLoading", { type: "login", is: false });
+          console.log(error.message);
+        });
       })
       .catch((error) => {
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-        commit('setLoading', { type: 'resolve', is: false })
-        commit('setLoading', { type: 'login', is: false })
-        console.log(error.message, ' is the error message')
-      })
+        );
+        commit("setLoading", { type: "resolve", is: false });
+        commit("setLoading", { type: "login", is: false });
+        console.log(error.message, " is the error message");
+      });
 
-    function getReferralID (userId) {
-      const name = `${user.email.split('@')[0].substring(0, 2).toUpperCase()}`
-      const id = userId.substring(0, 5)
-      return `${name}-${id}`
+    function getReferralID(userId) {
+      const name = `${user.email.split("@")[0].substring(0, 2).toUpperCase()}`;
+      const id = userId.substring(0, 5);
+      return `${name}-${id}`;
     }
   },
-  loginUser ({ commit, dispatch, state }, user) {
-    commit('setLoading', { type: 'login', is: true })
+  loginUser({ commit, dispatch, state }, user) {
+    commit("setLoading", { type: "login", is: true });
     auth
       .signInWithEmailAndPassword(user.email, user.password)
       .then(() => {
-        const userID = auth.currentUser.uid
-        console.log(userID)
+        const userID = auth.currentUser.uid;
+        console.log(userID);
         // get current user details
-        db.collection('users')
+        db.collection("users")
           .doc(userID)
           .get()
           .then((doc) => {
             if (doc.exists) {
-              const currentUser = doc.data()
-              commit('setState', { type: 'user', value: currentUser })
-              console.log(currentUser)
+              const currentUser = doc.data();
+              commit("setState", { type: "user", value: currentUser });
+              console.log(currentUser);
 
               // Update last login
-              updateLastLogin(currentUser.userID, user.date)
+              updateLastLogin(currentUser.userID, user.date);
               // Redirect to dashboard
               if (!state.user.block) {
                 if (state.user !== null) {
-                  if (state.user.role === 'admin') {
-                    this.$router.push('/admin')
+                  if (state.user.role === "admin") {
+                    this.$router.push("/admin");
                   } else if (state.user.block) {
                     dispatch(
-                      'controller/initAlert',
+                      "controller/initAlert",
                       {
                         is: true,
-                        type: 'success',
+                        type: "success",
                         message:
-                          'Your account is blocked please contact support'
+                          "Your account is blocked please contact support",
                       },
                       { root: true }
-                    )
+                    );
                   } else {
-                    this.$router.push('/dashboard/home')
+                    this.$router.push("/dashboard/home");
                   }
-                  commit('setLoading', { type: 'login', is: false })
+                  commit("setLoading", { type: "login", is: false });
                   dispatch(
-                    'controller/initAlert',
-                    { is: true, type: 'success', message: 'Login successful' },
+                    "controller/initAlert",
+                    { is: true, type: "success", message: "Login successful" },
                     { root: true }
-                  )
+                  );
                 }
               } else {
                 // location.href = '/login'
                 dispatch(
-                  'controller/initAlert',
+                  "controller/initAlert",
                   {
                     is: true,
-                    type: 'error',
+                    type: "error",
                     message:
-                      'Account blocked, Please contact support@iqsoptionscompany.online'
+                      "Account blocked, Please contact support@iqsoptionscompany.online",
                   },
                   { root: true }
-                )
-                commit('setLoading', { type: 'login', is: false })
+                );
+                commit("setLoading", { type: "login", is: false });
               }
             } else {
-              commit('setLoading', { type: 'login', is: false })
-              console.log('user not found')
+              commit("setLoading", { type: "login", is: false });
+              console.log("user not found");
               dispatch(
-                'controller/initAlert',
-                { is: true, type: 'error', message: 'user not found' },
+                "controller/initAlert",
+                { is: true, type: "error", message: "user not found" },
                 { root: true }
-              )
-              user.date = new Date().toLocaleDateString()
-              dispatch('resolveUser', user)
+              );
+              user.date = new Date().toLocaleDateString();
+              dispatch("resolveUser", user);
             }
           })
           .catch((error) => {
-            commit('setLoading', { type: 'login', is: false })
-            console.log('Error getting document:', error)
-          })
+            commit("setLoading", { type: "login", is: false });
+            console.log("Error getting document:", error);
+          });
       })
       .catch((error) => {
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-        commit('setLoading', { type: 'login', is: false })
-        console.log(error.message, ' is the error message')
-      })
+        );
+        commit("setLoading", { type: "login", is: false });
+        console.log(error.message, " is the error message");
+      });
 
-    function updateLastLogin (userID, date) {
-      db.collection('users').doc(userID).update({
-        lastLogin: date
-      })
+    function updateLastLogin(userID, date) {
+      db.collection("users").doc(userID).update({
+        lastLogin: date,
+      });
     }
   },
 
-  logoutUser ({ commit }) {
+  logoutUser({ commit }) {
     auth
       .signOut()
       .then(function () {
-        this.$router.push('/login')
-        commit('setState', { type: 'user', value: null })
+        this.$router.push("/login");
+        commit("setState", { type: "user", value: null });
       })
       .catch((error) => {
-        console.log(error.message)
-      })
+        console.log(error.message);
+      });
   },
 
-  resetPassword ({ commit, dispatch }, email) {
-    commit('setLoading', { type: 'reset', is: true })
+  resetPassword({ commit, dispatch }, email) {
+    commit("setLoading", { type: "reset", is: true });
     auth
       .sendPasswordResetEmail(email)
       .then(function () {
         // Email sent.
-        commit('setLoading', { type: 'reset', is: false })
+        commit("setLoading", { type: "reset", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'primary', message: 'Check email for reset link' },
+          "controller/initAlert",
+          { is: true, type: "primary", message: "Check email for reset link" },
           { root: true }
-        )
+        );
       })
       .catch(function (error) {
-        commit('setLoading', { type: 'reset', is: false })
+        commit("setLoading", { type: "reset", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-      })
+        );
+      });
   },
 
-  async updatePassword ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'password', is: true })
-    const user = auth.currentUser
-    const userId = auth.currentUser.uid
-    console.log(payload)
+  async updatePassword({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "password", is: true });
+    const user = auth.currentUser;
+    const userId = auth.currentUser.uid;
+    console.log(payload);
     await user
       .updatePassword(payload)
       .then(() => {
-        db.collection('users')
+        db.collection("users")
           .doc(userId)
           .update({
-            password: payload
+            password: payload,
           })
           .then(() => {
-            commit('setLoading', { type: 'password', is: false })
+            commit("setLoading", { type: "password", is: false });
             dispatch(
-              'controller/initAlert',
+              "controller/initAlert",
               {
                 is: true,
-                type: 'success',
-                message: 'Password updated successfully'
+                type: "success",
+                message: "Password updated successfully",
               },
               { root: true }
-            )
+            );
           })
           .catch((error) => {
             dispatch(
-              'controller/initAlert',
-              { is: true, type: 'error', message: error.message },
+              "controller/initAlert",
+              { is: true, type: "error", message: error.message },
               { root: true }
-            )
-          })
+            );
+          });
       })
       .catch((error) => {
-        commit('setLoading', { type: 'password', is: false })
+        commit("setLoading", { type: "password", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-      })
+        );
+      });
   },
-  async updateEmail ({ commit, dispatch, state }, email) {
-    commit('setLoading', { type: 'email', is: true })
-    const user = auth.currentUser
-    const userId = auth.currentUser.uid
+  async updateEmail({ commit, dispatch, state }, email) {
+    commit("setLoading", { type: "email", is: true });
+    const user = auth.currentUser;
+    const userId = auth.currentUser.uid;
     await auth
       .signInWithEmailAndPassword(state.user.email, state.user.password)
       .then(() => {
         user
           .updateEmail(email)
           .then(function () {
-            db.collection('users')
+            db.collection("users")
               .doc(userId)
               .update({
-                email
+                email,
               })
               .then(() => {
                 // console.log('user email data updated')
-                commit('setLoading', { type: 'email', is: false })
+                commit("setLoading", { type: "email", is: false });
                 dispatch(
-                  'controller/initAlert',
+                  "controller/initAlert",
                   {
                     is: true,
                     persistence: true,
-                    type: 'success',
-                    message: 'Email updated successfully'
+                    type: "success",
+                    message: "Email updated successfully",
                   },
                   { root: true }
-                )
+                );
               })
               .catch((error) => {
                 // console.log(error.message)
-                commit('setLoading', { type: 'email', is: false })
+                commit("setLoading", { type: "email", is: false });
                 dispatch(
-                  'controller/initAlert',
+                  "controller/initAlert",
                   {
                     is: true,
                     persistence: true,
-                    type: 'error',
-                    message: error.message
+                    type: "error",
+                    message: error.message,
                   },
                   { root: true }
-                )
-              })
+                );
+              });
           })
           .catch((error) => {
-            commit('setLoading', { type: 'email', is: false })
+            commit("setLoading", { type: "email", is: false });
             dispatch(
-              'controller/initAlert',
+              "controller/initAlert",
               {
                 is: true,
                 persistence: true,
-                type: 'error',
-                message: error.message
+                type: "error",
+                message: error.message,
               },
               { root: true }
-            )
-          })
+            );
+          });
       })
       .catch((error) => {
-        commit('setLoading', { type: 'email', is: false })
+        commit("setLoading", { type: "email", is: false });
         dispatch(
-          'controller/initAlert',
+          "controller/initAlert",
           {
             is: true,
             persistence: true,
-            type: 'error',
-            message: error.message
+            type: "error",
+            message: error.message,
           },
           { root: true }
-        )
-      })
+        );
+      });
   },
 
   // Update the wallet address
-  async referralFunc ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'referral', is: true })
+  async referralFunc({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "referral", is: true });
     // Get all users
     // Check for the referree
     // Update thier referral details
-    const ref = db.collection('users')
+    const ref = db.collection("users");
     await ref
       .get()
       .then((snapshot) => {
         snapshot.forEach((doc) => {
-          const user = doc.data()
+          const user = doc.data();
           if (user.referralID === payload.id) {
-            updateUser(user)
+            updateUser(user);
           }
-        })
+        });
       })
       .catch((error) => {
-        commit('setLoading', { type: 'referral', is: false })
-        console.log('Error getting document:', error)
-      })
+        commit("setLoading", { type: "referral", is: false });
+        console.log("Error getting document:", error);
+      });
 
-    function updateUser (arg) {
+    function updateUser(arg) {
       // get the array of referrals
-      const ref = db.collection('referrals')
-      const arr = []
+      const ref = db.collection("referrals");
+      const arr = [];
       ref
         .doc(arg.userID)
         .then((doc) => {
           if (doc.exists) {
-            arr.push(doc.data())
+            arr.push(doc.data());
           }
         })
         .catch((error) => {
-          commit('setLoading', { type: 'referral', is: false })
-          console.log('Error getting referral array:', error)
-        })
+          commit("setLoading", { type: "referral", is: false });
+          console.log("Error getting referral array:", error);
+        });
 
       // add the new array
-      arr && arr.push(arg)
+      arr && arr.push(arg);
 
       // update the referrals
       ref
         .update(arr)
         .then(() => {
-          console.log('Updated')
+          console.log("Updated");
         })
         .catch((error) => {
-          commit('setLoading', { type: 'referral', is: false })
-          console.log('Error getting referral array:', error)
-        })
+          commit("setLoading", { type: "referral", is: false });
+          console.log("Error getting referral array:", error);
+        });
 
       // update referral Wallet
-      arg.wallet.referral = parseFloat(arg.wallet.referral) + 80
-      db.collection('users').doc(arg.userID).update(arg)
+      arg.wallet.referral = parseFloat(arg.wallet.referral) + 80;
+      db.collection("users").doc(arg.userID).update(arg);
     }
   },
 
   // Update the wallet address
-  async updateWalletAddress ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'wallet', is: true })
-    const userId = auth.currentUser.uid
+  async updateWalletAddress({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "wallet", is: true });
+    const userId = auth.currentUser.uid;
     await db
-      .collection('users')
+      .collection("users")
       .doc(userId)
       .update({
-        walletAddress: payload
+        walletAddress: payload,
       })
       .then(() => {
-        commit('setLoading', { type: 'wallet', is: false })
+        commit("setLoading", { type: "wallet", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'success', message: 'Wallet Address Updated' },
+          "controller/initAlert",
+          { is: true, type: "success", message: "Wallet Address Updated" },
           { root: true }
-        )
+        );
       })
       .catch((error) => {
-        commit('setLoading', { type: 'wallet', is: false })
-        console.log(error.message)
+        commit("setLoading", { type: "wallet", is: false });
+        console.log(error.message);
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-      })
+        );
+      });
   },
   // Update the wallet address
-  async updateProfile ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'profile', is: true })
-    const userId = auth.currentUser.uid
+  async updateProfile({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "profile", is: true });
+    const userId = auth.currentUser.uid;
     await db
-      .collection('users')
+      .collection("users")
       .doc(userId)
       .update({
         firstName: payload.firstName,
@@ -714,529 +718,704 @@ export const actions = {
         email: payload.email,
         phoneNumber: payload.phoneNumber,
         country: payload.country,
-        currency: payload.currency
+        currency: payload.currency,
       })
       .then(() => {
-        commit('setLoading', { type: 'profile', is: false })
+        commit("setLoading", { type: "profile", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'success', message: 'Profile Updated' },
+          "controller/initAlert",
+          { is: true, type: "success", message: "Profile Updated" },
           { root: true }
-        )
+        );
       })
       .catch((error) => {
-        commit('setLoading', { type: 'profile', is: false })
-        console.log(error.message)
+        commit("setLoading", { type: "profile", is: false });
+        console.log(error.message);
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-      })
+        );
+      });
   },
 
   // Verification functions
-  initializeVerification ({ commit }) {
-    commit('setLoading', { type: 'verify', is: true })
+  initializeVerification({ commit }) {
+    commit("setLoading", { type: "verify", is: true });
 
-    const userID = auth.currentUser.uid
-    const ref = db.collection('verification').doc(userID)
+    const userID = auth.currentUser.uid;
+    const ref = db.collection("verification").doc(userID);
     ref.onSnapshot((snapshot) => {
       if (snapshot.exists) {
-        const data = snapshot.data()
-        console.log('Verification Data', data)
+        const data = snapshot.data();
+        console.log("Verification Data", data);
         // set State
-        commit('setState', { type: 'verification', value: data })
-        commit('setLoading', { type: 'verify', is: false })
+        commit("setState", { type: "verification", value: data });
+        commit("setLoading", { type: "verify", is: false });
       } else {
-        commit('setLoading', { type: 'verify', is: false })
+        commit("setLoading", { type: "verify", is: false });
       }
-    })
+    });
   },
 
-  async initVerification ({ commit, dispatch }, payload) {
-    const userID = auth.currentUser.uid
-    const ref = db.collection('verification').doc(userID)
-    commit('setLoading', { type: 'verify', is: true })
+  async initVerification({ commit, dispatch }, payload) {
+    const userID = auth.currentUser.uid;
+    const ref = db.collection("verification").doc(userID);
+    commit("setLoading", { type: "verify", is: true });
     const verificationObject = {
       identity: {
-        front: '',
-        back: '',
-        type: '',
-        status: null
+        front: "",
+        back: "",
+        type: "",
+        status: null,
       },
       address: {
-        type: '',
+        type: "",
         status: null,
-        document: ''
+        document: "",
       },
       face: {
-        photo: '',
-        status: null
-      }
-    }
+        photo: "",
+        status: null,
+      },
+    };
 
     await ref
       .set(verificationObject)
       .then(() => {
-        console.log('Initialization Complete')
-        commit('setLoading', { type: 'verify', is: false })
+        console.log("Initialization Complete");
+        commit("setLoading", { type: "verify", is: false });
       })
       .catch((error) => {
-        console.log(error.message)
-        commit('setLoading', { type: 'verify', is: false })
+        console.log(error.message);
+        commit("setLoading", { type: "verify", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-      })
+        );
+      });
   },
 
-  async verifyFunc ({ commit, dispatch }, payload) {
-    const field = payload.field
-    const userID = auth.currentUser.uid
-    const ref = db.collection('verification').doc(userID)
+  async verifyFunc({ commit, dispatch }, payload) {
+    const field = payload.field;
+    const userID = auth.currentUser.uid;
+    const ref = db.collection("verification").doc(userID);
 
     // Check if verification object is init
     await ref.get().then((doc) => {
       if (doc.exists) {
-        const data = doc.data()
+        const data = doc.data();
         // get Document
-        updateDoc(data)
+        updateDoc(data);
       } else {
         // init verification
-        dispatch('initVerification')
+        dispatch("initVerification");
 
         const data = {
           identity: {
-            front: '',
-            back: '',
-            type: '',
-            status: null
+            front: "",
+            back: "",
+            type: "",
+            status: null,
           },
           address: {
-            type: '',
+            type: "",
             status: null,
-            document: ''
+            document: "",
           },
           face: {
-            photo: '',
-            status: null
-          }
-        }
+            photo: "",
+            status: null,
+          },
+        };
 
-        updateDoc(data)
+        updateDoc(data);
         // upload document
       }
-    })
+    });
 
-    function updateDoc (data) {
-      if (field === 'identity') {
+    function updateDoc(data) {
+      if (field === "identity") {
         // update data locally
-        data.identity.message = ''
-        data.identity.type = payload.type
+        data.identity.message = "";
+        data.identity.type = payload.type;
 
         // update database
         ref.update({
-          identity: data
-        })
+          identity: data,
+        });
 
         // upload document
-        dispatch('verifyIdentity', {
+        dispatch("verifyIdentity", {
           data,
           photo: payload.front,
-          doc: 'front'
-        })
-        dispatch('verifyIdentity', { data, photo: payload.back, doc: 'back' })
-      } else if (field === 'address') {
+          doc: "front",
+        });
+        dispatch("verifyIdentity", { data, photo: payload.back, doc: "back" });
+      } else if (field === "address") {
         // update data locally
-        data.address.message = ''
-        data.address.type = payload.type
+        data.address.message = "";
+        data.address.type = payload.type;
 
         // update database
         ref.update({
-          address: data
-        })
+          address: data,
+        });
 
         // upload document
-        dispatch('verifyAddress', { data, photo: payload.document })
-      } else if (field === 'face') {
+        dispatch("verifyAddress", { data, photo: payload.document });
+      } else if (field === "face") {
         // update data locally
-        data.face.message = ''
+        data.face.message = "";
 
         // update database
-        console.log('updating ', data)
-        ref.update(data)
+        console.log("updating ", data);
+        ref.update(data);
 
         // upload document
-        const photo = payload.photo
-        dispatch('verifyFace', { data, photo })
+        const photo = payload.photo;
+        dispatch("verifyFace", { data, photo });
       }
       // update document
     }
   },
 
-  verifyAddress ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'verify', is: true })
+  async verifyAddress({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "verify", is: true });
     // update data locally
-    const data = payload.data
-    data.address.document = null // Doc mean either front or back document
-    const userID = auth.currentUser.uid
+    const data = payload.data;
+    data.address.document = null; // Doc mean either front or back document
+    const userID = auth.currentUser.uid;
 
     // uploadDoc(field, data, data.photo)
-    const ref = db.collection('verification').doc(userID)
+    const ref = db.collection("verification").doc(userID);
 
-    let photoURL
-    const photo = payload.photo
-    const filename = photo.name
-    const ext = filename.slice(filename.lastIndexOf('.'))
+    const uniqueID = ID.unique();
 
-    st.ref(`verification/${userID}${ext}`)
-      .put(photo)
-      .then((res) => {
-        // console.log('start download')
-        st.ref(`verification/${userID}${ext}`)
-          .getDownloadURL()
-          .then((url) => {
-            photoURL = url
-            // update photo in the database
-            data.address.status = 'Progress'
-            data.address.document = photoURL
-            console.log('data', data)
+    const { str_id, endpoint, project_id } = appWriteConfig;
 
-            ref
-              .update(data)
-              .then(function () {
-                console.log('Verification updated')
-                commit('setLoading', { type: 'verify', is: false })
-                dispatch(
-                  'controller/initAlert',
-                  {
-                    is: true,
-                    type: 'success',
-                    message: 'Document submitted successfully'
-                  },
-                  { root: true }
-                )
-                // initialize verification
-                // dispatch('initializeVerification')
+    const client = new Client()
+      .setEndpoint(endpoint) // Set the API endpoint
+      .setProject(project_id); // Set the project ID
 
-                emailjs
-                  .send(
-                    'service_o1jxfdq',
-                    'template_la5r8go',
-                    {
-                      name: `${state.user.firstName} ${state.user.lastName}`,
-                      email: state.user.email,
-                      type: 'Address'
-                    },
-                    'g4yJHxMCGPWYp4YGs'
-                  )
-                  .then(() => {
-                    console.log('Email Sent to User Successfully')
-                    //   });
-                  })
-                  .catch(function (error) {
-                    // The document probably doesn't exist.
-                    console.log(error.message)
-                    commit('setLoading', { type: 'verify', is: false })
-                    dispatch(
-                      'controller/initAlert',
-                      { is: true, type: 'error', message: error.message },
-                      { root: true }
-                    )
-                  })
-              })
-              .catch((error) => {
-                console.log(error.message)
-                commit('setLoading', { type: 'verify', is: false })
-                dispatch(
-                  'controller/initAlert',
-                  { is: true, type: 'error', message: error.message },
-                  { root: true }
-                )
-              })
-          })
-          .catch((err) => {
-            console.log(err)
-            commit('setLoading', { type: 'verify', is: false })
-            dispatch(
-              'controller/initAlert',
-              { is: true, type: 'error', message: err.message },
-              { root: true }
-            )
-          })
-      })
+    // Ensure `client` is initialized correctly before passing it
+    if (!client) {
+      throw new Error("Client is not initialized");
+    }
+
+    // Create a new Storage instance
+    const storage = new Storage(client);
+
+    try {
+      // Create a new file
+      const createFileFN = await storage.createFile(
+        str_id,
+        uniqueID,
+        payload.photo
+      );
+
+      // Get the file view URL
+      const url = await storage.getFileView(str_id, uniqueID);
+
+      data.address.status = "Progress";
+      data.address.document = url;
+      console.log("data", data, url, " is the data and url");
+
+      await ref.update(data).then(() => {
+        console.log("Verification updated");
+        commit("setLoading", { type: "verify", is: false });
+        dispatch(
+          "controller/initAlert",
+          {
+            is: true,
+            type: "success",
+            message: "Document submitted successfully",
+          },
+          { root: true }
+        );
+      });
+
+      commit("setLoading", { type: "verify", is: false });
+      // return url
+    } catch (error) {
+      console.log(error);
+      commit("setLoading", { type: "verify", is: false });
+      dispatch(
+        "controller/initAlert",
+        { is: true, type: "error", message: error.message },
+        { root: true }
+      );
+      throw error; // Ensure errors are handled properly
+    }
+
+    // let photoURL
+
+    // const photo = payload.photo
+    // const filename = photo.name
+    // const ext = filename.slice(filename.lastIndexOf('.'))
+
+    // st.ref(`verification/${userID}${ext}`)
+    //   .put(photo)
+    //   .then((res) => {
+    //     // console.log('start download')
+    //     st.ref(`verification/${userID}${ext}`)
+    //       .getDownloadURL()
+    //       .then((url) => {
+    //         photoURL = url
+    //         // update photo in the database
+    //         data.address.status = 'Progress'
+    //         data.address.document = photoURL
+    //         console.log('data', data)
+
+    //         ref
+    //           .update(data)
+    //           .then(function () {
+    //             console.log('Verification updated')
+    //             commit('setLoading', { type: 'verify', is: false })
+    //             dispatch(
+    //               'controller/initAlert',
+    //               {
+    //                 is: true,
+    //                 type: 'success',
+    //                 message: 'Document submitted successfully'
+    //               },
+    //               { root: true }
+    //             )
+    //             // initialize verification
+    //             // dispatch('initializeVerification')
+
+    //             emailjs
+    //               .send(
+    //                 'service_o1jxfdq',
+    //                 'template_la5r8go',
+    //                 {
+    //                   name: `${state.user.firstName} ${state.user.lastName}`,
+    //                   email: state.user.email,
+    //                   type: 'Address'
+    //                 },
+    //                 'g4yJHxMCGPWYp4YGs'
+    //               )
+    //               .then(() => {
+    //                 console.log('Email Sent to User Successfully')
+    //                 //   });
+    //               })
+    //               .catch(function (error) {
+    //                 // The document probably doesn't exist.
+    //                 console.log(error.message)
+    //                 commit('setLoading', { type: 'verify', is: false })
+    //                 dispatch(
+    //                   'controller/initAlert',
+    //                   { is: true, type: 'error', message: error.message },
+    //                   { root: true }
+    //                 )
+    //               })
+    //           })
+    //           .catch((error) => {
+    //             console.log(error.message)
+    //             commit('setLoading', { type: 'verify', is: false })
+    //             dispatch(
+    //               'controller/initAlert',
+    //               { is: true, type: 'error', message: error.message },
+    //               { root: true }
+    //             )
+    //           })
+    //       })
+    //       .catch((error) => {
+    //         console.log(error)
+    //         commit('setLoading', { type: 'verify', is: false })
+    //         dispatch(
+    //           'controller/initAlert',
+    //           { is: true, type: 'error', message: error.message },
+    //           { root: true }
+    //         )
+    //       })
+    //   })
   },
 
-  verifyIdentity ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'verify', is: true })
+  async verifyIdentity({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "verify", is: true });
     // update data locally
-    const data = payload.data
-    data.identity[payload.doc] = null // Doc mean either front or back document
-    const userID = auth.currentUser.uid
+    const data = payload.data;
+    data.identity[payload.doc] = null; // Doc mean either front or back document
+    const userID = auth.currentUser.uid;
 
     // uploadDoc(field, data, data.photo)
-    const ref = db.collection('verification').doc(userID)
+    const ref = db.collection("verification").doc(userID);
 
-    let photoURL
-    const photo = payload.photo
-    const filename = photo.name
-    const ext = filename.slice(filename.lastIndexOf('.'))
+    const uniqueID = ID.unique();
 
-    st.ref(`verification/${userID}${ext}`)
-      .put(photo)
-      .then((res) => {
-        // console.log('start download')
-        st.ref(`verification/${userID}${ext}`)
-          .getDownloadURL()
-          .then((url) => {
-            photoURL = url
-            // update photo in the database
-            data.identity.status = 'Progress'
-            data.identity[payload.doc] = photoURL
-            console.log('data', data)
+    const { str_id, endpoint, project_id } = appWriteConfig;
 
-            ref
-              .update(data)
-              .then(function () {
-                console.log('Verification updated')
-                commit('setLoading', { type: 'verify', is: false })
-                dispatch(
-                  'controller/initAlert',
-                  {
-                    is: true,
-                    type: 'success',
-                    message: 'Document submitted successfully'
-                  },
-                  { root: true }
-                )
+    const client = new Client()
+      .setEndpoint(endpoint) // Set the API endpoint
+      .setProject(project_id); // Set the project ID
 
-                // initialize verification
-                // dispatch('initializeVerification')
+    // Ensure `client` is initialized correctly before passing it
+    if (!client) {
+      throw new Error("Client is not initialized");
+    }
 
-                emailjs
-                  .send(
-                    'service_o1jxfdq',
-                    'template_la5r8go',
-                    {
-                      name: `${state.user.firstName} ${state.user.lastName}`,
-                      email: state.user.email,
-                      type: 'Identity'
-                    },
-                    'g4yJHxMCGPWYp4YGs'
-                  )
-                  .then(() => {
-                    console.log('Email Sent to User Successfully')
-                  })
-              })
-              .catch(function (error) {
-                // The document probably doesn't exist.
-                console.log(error.message)
-                commit('setLoading', { type: 'verify', is: false })
-                dispatch(
-                  'controller/initAlert',
-                  { is: true, type: 'error', message: error.message },
-                  { root: true }
-                )
-              })
-          })
-          .catch((error) => {
-            console.log(error.message)
-            commit('setLoading', { type: 'verify', is: false })
-            dispatch(
-              'controller/initAlert',
-              { is: true, type: 'error', message: error.message },
-              { root: true }
-            )
-          })
-      })
-      .catch((err) => {
-        console.log(err)
-        commit('setLoading', { type: 'verify', is: false })
+    // Create a new Storage instance
+    const storage = new Storage(client);
+
+    try {
+      // Create a new file
+      const createFileFN = await storage.createFile(
+        str_id,
+        uniqueID,
+        payload.photo
+      );
+
+      // Get the file view URL
+      const url = storage.getFileView(str_id, uniqueID);
+
+      data.identity.status = "Progress";
+      data.identity[payload.doc] = url;
+      console.log("data", data);
+
+      await ref.update(data).then(() => {
+        console.log("Verification updated");
+        commit("setLoading", { type: "verify", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: err.message },
+          "controller/initAlert",
+          {
+            is: true,
+            type: "success",
+            message: "Document submitted successfully",
+          },
           { root: true }
-        )
-      })
+        );
+      });
+
+      commit("setLoading", { type: "verify", is: false });
+      // return url
+    } catch (error) {
+      console.log(error);
+      commit("setLoading", { type: "verify", is: false });
+      dispatch(
+        "controller/initAlert",
+        { is: true, type: "error", message: error.message },
+        { root: true }
+      );
+      throw error; // Ensure errors are handled properly
+    }
+
+    // let photoURL
+    // const photo = payload.photo
+    // const filename = photo.name
+    // const ext = filename.slice(filename.lastIndexOf('.'))
+
+    // st.ref(`verification/${userID}${ext}`)
+    //   .put(photo)
+    //   .then((res) => {
+    //     // console.log('start download')
+    //     st.ref(`verification/${userID}${ext}`)
+    //       .getDownloadURL()
+    //       .then((url) => {
+    //         photoURL = url
+    //         // update photo in the database
+    //         data.identity.status = 'Progress'
+    //         data.identity[payload.doc] = photoURL
+    //         console.log('data', data)
+
+    //         ref
+    //           .update(data)
+    //           .then(function () {
+    //             console.log('Verification updated')
+    //             commit('setLoading', { type: 'verify', is: false })
+    //             dispatch(
+    //               'controller/initAlert',
+    //               {
+    //                 is: true,
+    //                 type: 'success',
+    //                 message: 'Document submitted successfully'
+    //               },
+    //               { root: true }
+    //             )
+
+    //             // initialize verification
+    //             // dispatch('initializeVerification')
+
+    //             emailjs
+    //               .send(
+    //                 'service_o1jxfdq',
+    //                 'template_la5r8go',
+    //                 {
+    //                   name: `${state.user.firstName} ${state.user.lastName}`,
+    //                   email: state.user.email,
+    //                   type: 'Identity'
+    //                 },
+    //                 'g4yJHxMCGPWYp4YGs'
+    //               )
+    //               .then(() => {
+    //                 console.log('Email Sent to User Successfully')
+    //               })
+    //           })
+    //           .catch(function (error) {
+    //             // The document probably doesn't exist.
+    //             console.log(error.message)
+    //             commit('setLoading', { type: 'verify', is: false })
+    //             dispatch(
+    //               'controller/initAlert',
+    //               { is: true, type: 'error', message: error.message },
+    //               { root: true }
+    //             )
+    //           })
+    //       })
+    //       .catch((error) => {
+    //         console.log(error.message)
+    //         commit('setLoading', { type: 'verify', is: false })
+    //         dispatch(
+    //           'controller/initAlert',
+    //           { is: true, type: 'error', message: error.message },
+    //           { root: true }
+    //         )
+    //       })
+    //   })
+    //   .catch((error) => {
+    //     console.log(error)
+    //     commit('setLoading', { type: 'verify', is: false })
+    //     dispatch(
+    //       'controller/initAlert',
+    //       { is: true, type: 'error', message: error.message },
+    //       { root: true }
+    //     )
+    //   })
   },
-  verifyFace ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'verify', is: true })
+
+  async verifyFace({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "verify", is: true });
     // update data locally
-    const data = payload.data
-    data.face.photo = null
-    const userID = auth.currentUser.uid
+    const data = payload.data;
+    data.face.photo = null;
+    const userID = auth.currentUser.uid;
 
     // uploadDoc(field, data, data.photo)
-    const ref = db.collection('verification').doc(userID)
+    const ref = db.collection("verification").doc(userID);
 
-    let photoURL
-    const photo = payload.photo
-    const filename = photo.name
-    const ext = filename.slice(filename.lastIndexOf('.'))
+    const uniqueID = ID.unique();
+    const { str_id, endpoint, project_id } = appWriteConfig;
 
-    st.ref(`verification/${userID}${ext}`)
-      .put(photo)
-      .then((res) => {
-        // console.log('start download')
-        st.ref(`verification/${userID}${ext}`)
-          .getDownloadURL()
-          .then((url) => {
-            photoURL = url
-            // update photo in the database
-            data.face.status = 'Progress'
-            data.face.photo = photoURL
-            console.log('data', data)
+    const client = new Client()
+      .setEndpoint(endpoint) // Set the API endpoint
+      .setProject(project_id); // Set the project ID
 
-            ref
-              .update(data)
-              .then(function () {
-                console.log('Verification updated')
-                commit('setLoading', { type: 'verify', is: false })
-                dispatch(
-                  'controller/initAlert',
-                  {
-                    is: true,
-                    type: 'success',
-                    message: 'Document submitted successfully'
-                  },
-                  { root: true }
-                )
-                // initialize verification
-                // dispatch('initializeVerification')
+    // Ensure `client` is initialized correctly before passing it
+    if (!client) {
+      throw new Error("Client is not initialized");
+    }
 
-                emailjs
-                  .send(
-                    'service_o1jxfdq',
-                    'template_la5r8go',
-                    {
-                      name: `${state.user.firstName} ${state.user.lastName}`,
-                      email: state.user.email,
-                      type: 'Facial'
-                    },
-                    'g4yJHxMCGPWYp4YGs'
-                  )
-                  .then(() => {
-                    console.log('Email Sent to User Successfully')
-                  })
-              })
-              .catch(function (error) {
-                // The document probably doesn't exist.
-                console.log(error.message)
-                commit('setLoading', { type: 'verify', is: false })
+    // Create a new Storage instance
+    const storage = new Storage(client);
 
-                dispatch(
-                  'controller/initAlert',
-                  { is: true, type: 'error', message: error.message },
-                  { root: true }
-                )
-              })
-          })
-          .catch((error) => {
-            console.log(error.message)
-            commit('setLoading', { type: 'verify', is: false })
-            dispatch(
-              'controller/initAlert',
-              { is: true, type: 'error', message: error.message },
-              { root: true }
-            )
-          })
-      })
-      .catch((err) => {
-        console.log(err)
-        commit('setLoading', { type: 'verify', is: false })
+    try {
+      // Create a new file
+      const createFileFN = await storage.createFile(
+        str_id,
+        uniqueID,
+        payload.photo
+      );
+
+      // Get the file view URL
+      const url = storage.getFileView(str_id, uniqueID);
+
+      data.face.status = "Progress";
+      data.face.photo = url;
+      console.log("data", data);
+
+      await ref.update(data).then(() => {
+        console.log("Verification updated");
+        commit("setLoading", { type: "verify", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: err.message },
+          "controller/initAlert",
+          {
+            is: true,
+            type: "success",
+            message: "Document submitted successfully",
+          },
           { root: true }
-        )
-      })
+        );
+      });
+
+      commit("setLoading", { type: "verify", is: false });
+      // return url
+    } catch (error) {
+      console.log(error);
+      commit("setLoading", { type: "verify", is: false });
+      dispatch(
+        "controller/initAlert",
+        { is: true, type: "error", message: error.message },
+        { root: true }
+      );
+      throw error; // Ensure errors are handled properly
+    }
+
+    // let photoURL
+    // const photo = payload.photo
+    // const filename = photo.name
+    // const ext = filename.slice(filename.lastIndexOf('.'))
+
+    // st.ref(`verification/${userID}${ext}`)
+    //   .put(photo)
+    //   .then((res) => {
+    //     // console.log('start download')
+    //     st.ref(`verification/${userID}${ext}`)
+    //       .getDownloadURL()
+    //       .then((url) => {
+    //         photoURL = url
+    //         // update photo in the database
+    //         data.face.status = 'Progress'
+    //         data.face.photo = photoURL
+    //         console.log('data', data)
+
+    //         ref
+    //           .update(data)
+    //           .then(function () {
+    //             console.log('Verification updated')
+    //             commit('setLoading', { type: 'verify', is: false })
+    //             dispatch(
+    //               'controller/initAlert',
+    //               {
+    //                 is: true,
+    //                 type: 'success',
+    //                 message: 'Document submitted successfully'
+    //               },
+    //               { root: true }
+    //             )
+    //             // initialize verification
+    //             // dispatch('initializeVerification')
+
+    //             emailjs
+    //               .send(
+    //                 'service_o1jxfdq',
+    //                 'template_la5r8go',
+    //                 {
+    //                   name: `${state.user.firstName} ${state.user.lastName}`,
+    //                   email: state.user.email,
+    //                   type: 'Facial'
+    //                 },
+    //                 'g4yJHxMCGPWYp4YGs'
+    //               )
+    //               .then(() => {
+    //                 console.log('Email Sent to User Successfully')
+    //               })
+    //           })
+    //           .catch(function (error) {
+    //             // The document probably doesn't exist.
+    //             console.log(error.message)
+    //             commit('setLoading', { type: 'verify', is: false })
+
+    //             dispatch(
+    //               'controller/initAlert',
+    //               { is: true, type: 'error', message: error.message },
+    //               { root: true }
+    //             )
+    //           })
+    //       })
+    //       .catch((error) => {
+    //         console.log(error.message)
+    //         commit('setLoading', { type: 'verify', is: false })
+    //         dispatch(
+    //           'controller/initAlert',
+    //           { is: true, type: 'error', message: error.message },
+    //           { root: true }
+    //         )
+    //       })
+    //   })
+    //   .catch((error) => {
+    //     console.log(error)
+    //     commit('setLoading', { type: 'verify', is: false })
+    //     dispatch(
+    //       'controller/initAlert',
+    //       { is: true, type: 'error', message: error.message },
+    //       { root: true }
+    //     )
+    //   })
   },
   // Verification Functions
-  async updateStatus ({ commit, dispatch, state }, payload) {
-    commit('setLoading', { type: 'verify', is: true })
+  async updateStatus({ commit, dispatch, state }, payload) {
+    commit("setLoading", { type: "verify", is: true });
     // get the exact veritification data and update the status locally
-    const data = state.verification[payload]
-    data.status = null
-    const userID = auth.currentUser.uid
+    const data = state.verification[payload];
+    data.status = null;
+    const userID = auth.currentUser.uid;
     // update the status on the server
-    const ref = db.collection('verification').doc(userID)
+    const ref = db.collection("verification").doc(userID);
     await ref
       .update({
-        [payload]: data
+        [payload]: data,
       })
       .then(function () {
-        console.log('Status updated')
-        commit('setLoading', { type: 'verify', is: false })
+        console.log("Status updated");
+        commit("setLoading", { type: "verify", is: false });
       })
       .catch(function (error) {
         // The document probably doesn't exist.
-        console.log(error.message)
-        commit('setLoading', { type: 'verify', is: false })
+        console.log(error.message);
+        commit("setLoading", { type: "verify", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-      })
+        );
+      });
   },
 
-  handleAuth ({ commit, dispatch, state }) {
+  handleAuth({ commit, dispatch, state }) {
     auth.onAuthStateChanged((user) => {
       if (user) {
-        commit('setState', { type: 'login', value: true })
+        commit("setState", { type: "login", value: true });
         // get current user id
-        const userId = auth.currentUser.uid
+        const userId = auth.currentUser.uid;
         // get current user details
-        db.collection('users')
+        db.collection("users")
           .doc(userId)
           .onSnapshot((snapshot) => {
             if (snapshot.exists) {
-              const currentUser = snapshot.data()
+              const currentUser = snapshot.data();
 
-              commit('setState', { type: 'user', value: currentUser })
+              commit("setState", { type: "user", value: currentUser });
               // init transactions
 
               // Redirect to dashboard
               if (!state.user.block) {
-                dispatch('controller/initApp', null, { root: true })
-                dispatch('admin/initAdmin', null, { root: true })
+                dispatch("controller/initApp", null, { root: true });
+                dispatch("admin/initAdmin", null, { root: true });
 
                 if (state.user !== null) {
-                  if (state.user.role !== 'admin') {
-                    this.$router.push('/dashboard/home')
+                  if (state.user.role !== "admin") {
+                    this.$router.push("/dashboard/home");
                   }
                 }
               } else {
-                location.href = '/login'
+                location.href = "/login";
                 dispatch(
-                  'controller/initAlert',
+                  "controller/initAlert",
                   {
                     is: true,
-                    type: 'error',
+                    type: "error",
                     message:
-                      'Account blocked, Please contact support@iqsoptionscompany.online'
+                      "Account blocked, Please contact support@iqsoptionscompany.online",
                   },
                   { root: true }
-                )
-                commit('setLoading', { type: 'login', is: false })
+                );
+                commit("setLoading", { type: "login", is: false });
               }
 
-              console.log(state.user)
+              console.log(state.user);
             } else {
               // snapshot.data() will be undefined in this case
               // eslint-disable-next-line
               console.log("No such document!");
             }
-          })
+          });
       } else {
         // console.log('logout')
-        location.href = '/login'
-        commit('setState', { type: 'login', value: false })
-        commit('setState', { type: 'user', value: null })
+        location.href = "/login";
+        commit("setState", { type: "login", value: false });
+        commit("setState", { type: "user", value: null });
       }
-    })
-  }
-}
+    });
+  },
+};
