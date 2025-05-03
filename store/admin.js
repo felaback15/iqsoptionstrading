@@ -796,14 +796,16 @@ export const actions = {
 
   // Verification Functions
   // Verification functions
-  initializeVerification ({ commit }, payload) {
+  async initializeVerification ({ commit }, payload) {
     commit('setLoading', { type: 'verify', is: true })
     let ref
     const arr = []
 
+    console.log(payload, ' is the payload im looking for')
+
     if (payload) {
-      ref = db.collection('verification').doc(payload)
-      ref.get().then((doc) => {
+      ref = await db.collection('verification').doc(payload)
+      await ref.get().then((doc) => {
         if (doc.exists) {
           const data = doc.data()
 
@@ -811,11 +813,14 @@ export const actions = {
           console.log('verification', data)
           commit('setState', { type: 'verification', value: data })
           commit('setLoading', { type: 'verify', is: false })
+        } else {
+          commit('setState', { type: 'verification', value: null })
+          commit('setLoading', { type: 'verify', is: false })
         }
       })
     } else {
-      ref = db.collection('verification')
-      ref.onSnapshot((snapshot) => {
+      ref = await db.collection('verification')
+      await ref.onSnapshot((snapshot) => {
         const data = snapshot.docs
         // console.log(data)
         data.forEach((doc) => {

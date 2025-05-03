@@ -1,27 +1,60 @@
 <template>
   <p-container tile border :title="'Verification'">
     <template v-slot:header>
-      <v-chip label small :color="verified ? 'success' : 'accent'" class="text-uppercase">
+      <v-chip
+        label
+        small
+        :color="verified ? 'success' : 'accent'"
+        class="text-uppercase"
+      >
         <v-icon small left>
-          {{ verified ? 'mdi-account-check' : 'mdi-account-clock' }}
+          {{ verified ? "mdi-account-check" : "mdi-account-clock" }}
         </v-icon>
 
-        {{ verified ? 'Verified' : 'Not Verified' }}
+        {{ verified ? "Verified" : "Not Verified" }}
       </v-chip>
     </template>
     <v-expansion-panels flat>
       <!-- /////////////////// Identity Verification ///////////////// -->
       <v-expansion-panel v-if="verification && verification.identity">
         <v-expansion-panel-header disable-icon-rotate>
-          Indentity Verification - <strong> {{ verification && verification.identity && verification.identity.type }}</strong>
+          Indentity Verification -
+          <strong>
+            {{
+              verification &&
+                verification.identity &&
+                verification.identity.type
+            }}</strong>
           <template v-slot:actions>
-            <v-icon :color="getColor(verification && verification.identity && verification.identity.status)">
-              {{ getIcon(verification && verification.identity && verification.identity.status) }}
+            <v-icon
+              :color="
+                getColor(
+                  verification &&
+                    verification.identity &&
+                    verification.identity.status
+                )
+              "
+            >
+              {{
+                getIcon(
+                  verification &&
+                    verification.identity &&
+                    verification.identity.status
+                )
+              }}
             </v-icon>
           </template>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-row v-if="verification && verification.identity && verification.identity.status !== null" justify="center" class="ma-0">
+          <v-row
+            v-if="
+              verification &&
+                verification.identity &&
+                verification.identity.status !== null
+            "
+            justify="center"
+            class="ma-0"
+          >
             <v-col cols="12" md="6" class="px-0 px-md-6">
               <v-card outlined class="mx-auto">
                 <v-card-text>
@@ -29,7 +62,11 @@
                     contain
                     max-height="300"
                     width="100%"
-                    :src="verification && verification.identity && verification.identity.front"
+                    :src="
+                      verification &&
+                        verification.identity &&
+                        verification.identity.front
+                    "
                     :alt="verification.identity && verification.identity.type"
                     @load="identity.front = true"
                   />
@@ -48,7 +85,11 @@
                     contain
                     max-height="300"
                     width="100%"
-                    :src="verification && verification.identity && verification.identity.back"
+                    :src="
+                      verification &&
+                        verification.identity &&
+                        verification.identity.back
+                    "
                     :alt="verification.identity && verification.identity.type"
                     @load="identity.back = true"
                   />
@@ -61,10 +102,24 @@
               </v-card>
             </v-col>
             <v-col cols="12" md="10" class="text-center">
-              <v-btn depressed color="success" class="px-6 text-subtitle-1 font-weight-light text-capitalize" @click="toggle(true, 'Identity Verification', 'identity', 'approve')">
+              <v-btn
+                depressed
+                color="success"
+                class="px-6 text-subtitle-1 font-weight-light text-capitalize"
+                @click="
+                  toggle(true, 'Identity Verification', 'identity', 'approve')
+                "
+              >
                 Approve
               </v-btn>
-              <v-btn depressed color="error" class="px-6 text-subtitle-1 font-weight-light text-capitalize" @click="toggle(true, 'Identity Verification', 'identity', 'decline')">
+              <v-btn
+                depressed
+                color="error"
+                class="px-6 text-subtitle-1 font-weight-light text-capitalize"
+                @click="
+                  toggle(true, 'Identity Verification', 'identity', 'decline')
+                "
+              >
                 Decline
               </v-btn>
             </v-col>
@@ -80,23 +135,51 @@
       <!-- /////////////////// Address Verification ///////////////// -->
       <v-expansion-panel v-if="verification && verification.address">
         <v-expansion-panel-header disable-icon-rotate>
-          Address Verification - <strong>{{ verification && verification.address && verification.address.type }}</strong>
+          Address Verification -
+          <strong>{{
+            verification && verification.address && verification.address.type
+          }}</strong>
           <template v-slot:actions>
-            <v-icon :color="getColor(verification && verification.address && verification.address.status)">
-              {{ getIcon(verification && verification.address && verification.address.status) }}
+            <v-icon
+              :color="
+                getColor(
+                  verification &&
+                    verification.address &&
+                    verification.address.status
+                )
+              "
+            >
+              {{
+                getIcon(
+                  verification &&
+                    verification.address &&
+                    verification.address.status
+                )
+              }}
             </v-icon>
           </template>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-row v-if="verification && verification && verification.address.status !== null" justify="center" class="ma-0">
+          <v-row
+            v-if="
+              verification &&
+                verification &&
+                verification.address.status !== null
+            "
+            justify="center"
+            class="ma-0"
+          >
             <v-col cols="12" md="10" class="px-0 px-md-6">
               <v-card outlined class="mx-auto">
                 <v-card-text>
                   <v-img
-
                     contain
                     width="100%"
-                    :src="verification.address && verification.address && verification.address.document"
+                    :src="
+                      verification.address &&
+                        verification.address &&
+                        verification.address.document
+                    "
                     :alt="verification.address && verification.address.type"
                     @load="address = true"
                   />
@@ -109,10 +192,24 @@
               </v-card>
             </v-col>
             <v-col cols="12" md="10" class="text-center">
-              <v-btn depressed color="success" class="px-6 text-subtitle-1 font-weight-light text-capitalize" @click="toggle(true, 'Address Verification', 'address', 'approve')">
+              <v-btn
+                depressed
+                color="success"
+                class="px-6 text-subtitle-1 font-weight-light text-capitalize"
+                @click="
+                  toggle(true, 'Address Verification', 'address', 'approve')
+                "
+              >
                 Approve
               </v-btn>
-              <v-btn depressed color="error" class="px-6 text-subtitle-1 font-weight-light text-capitalize" @click="toggle(true, 'Address Verification', 'address', 'decline')">
+              <v-btn
+                depressed
+                color="error"
+                class="px-6 text-subtitle-1 font-weight-light text-capitalize"
+                @click="
+                  toggle(true, 'Address Verification', 'address', 'decline')
+                "
+              >
                 Decline
               </v-btn>
             </v-col>
@@ -128,15 +225,36 @@
       <!-- /////////////////// Facial Verification ///////////////// -->
       <v-expansion-panel v-if="verification && verification.face">
         <v-expansion-panel-header disable-icon-rotate>
-          Facial Verification - <strong>{{ verification && verification.face && verification.face.type }}</strong>
+          Facial Verification -
+          <strong>{{
+            verification && verification.face && verification.face.type
+          }}</strong>
           <template v-slot:actions>
-            <v-icon :color="getColor(verification && verification.face && verification.face.status)">
-              {{ getIcon(verification && verification.face && verification.face.status) }}
+            <v-icon
+              :color="
+                getColor(
+                  verification && verification.face && verification.face.status
+                )
+              "
+            >
+              {{
+                getIcon(
+                  verification && verification.face && verification.face.status
+                )
+              }}
             </v-icon>
           </template>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-row v-if="verification && verification.face && verification.face.status !== null" justify="center" class="ma-0">
+          <v-row
+            v-if="
+              verification &&
+                verification.face &&
+                verification.face.status !== null
+            "
+            justify="center"
+            class="ma-0"
+          >
             <v-col cols="12" md="10" class="px-0 px-md-6">
               <v-card outlined class="mx-auto">
                 <v-card-text>
@@ -145,7 +263,11 @@
                     max-height="300"
                     contain
                     width="100%"
-                    :src="verification && verification.face && verification.face.photo"
+                    :src="
+                      verification &&
+                        verification.face &&
+                        verification.face.photo
+                    "
                     @load="face = true"
                   />
                   <v-progress-linear
@@ -157,10 +279,20 @@
               </v-card>
             </v-col>
             <v-col cols="12" md="10" class="text-center">
-              <v-btn depressed color="success" class="px-6 text-subtitle-1 font-weight-light text-capitalize" @click="toggle(true, 'Facial Recognition', 'face', 'approve')">
+              <v-btn
+                depressed
+                color="success"
+                class="px-6 text-subtitle-1 font-weight-light text-capitalize"
+                @click="toggle(true, 'Facial Recognition', 'face', 'approve')"
+              >
                 Approve
               </v-btn>
-              <v-btn depressed color="error" class="px-6 text-subtitle-1 font-weight-light text-capitalize" @click="toggle(true, 'Facial Recognition', 'face', 'decline')">
+              <v-btn
+                depressed
+                color="error"
+                class="px-6 text-subtitle-1 font-weight-light text-capitalize"
+                @click="toggle(true, 'Facial Recognition', 'face', 'decline')"
+              >
                 Decline
               </v-btn>
             </v-col>
@@ -225,13 +357,17 @@ export default {
       const identity = this.verification && this.verification.identity.status
       const face = this.verification && this.verification.face.status
       const arr = [address, identity, face]
+      console.log(arr)
       verified = arr.every(el => el === true)
       return verified
     }
   },
-  created () {
+  async created () {
     console.log(this.user)
-    this.$store.dispatch('admin/initializeVerification', this.user && this.user.userID)
+    await this.$store.dispatch(
+      'admin/initializeVerification',
+      this.user?.userID
+    )
   },
   methods: {
     getColor (status) {
@@ -264,10 +400,7 @@ export default {
       this.action = action
     }
   }
-
 }
 </script>
 
-<style>
-
-</style>
+<style></style>
