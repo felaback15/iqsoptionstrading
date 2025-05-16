@@ -47,14 +47,14 @@
               </v-list-item-icon>
               <v-list-item-title>Update Profile</v-list-item-title>
             </v-list-item>
-            <v-list-item dense @click="toggleEmail(true)">
+            <!-- <v-list-item dense @click="toggleEmail(true)">
               <v-list-item-icon>
                 <v-icon size="20" class="px-1">
                   mdi-email
                 </v-icon>
               </v-list-item-icon>
               <v-list-item-title>Update Email</v-list-item-title>
-            </v-list-item>
+            </v-list-item> -->
             <v-list-item dense @click="toggleWallet(true)">
               <v-list-item-icon>
                 <v-icon size="20" class="px-1">
@@ -248,5 +248,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>

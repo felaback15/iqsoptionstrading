@@ -546,17 +546,50 @@ export const actions = {
         );
       });
   },
+
+  //note: how to fix the update email function
   async updateEmail({ commit, dispatch, state }, email) {
     commit("setLoading", { type: "email", is: true });
     const user = auth.currentUser;
     const userId = auth.currentUser.uid;
     await auth
       .signInWithEmailAndPassword(state.user.email, state.user.password)
-      .then(() => {
-        user
+      .then(async () => {
+        await user
           .updateEmail(email)
-          .then(function () {
-            db.collection("users")
+          .then(async function () {
+            await user
+              .sendEmailVerification()
+              .then(() => {
+                commit("setLoading", { type: "email", is: false });
+                dispatch(
+                  "controller/initAlert",
+                  {
+                    is: true,
+                    persistence: true,
+                    type: "success",
+                    message: "Email updated successfully",
+                  },
+                  { root: true }
+                );
+              })
+              .catch((error) => {
+                console.log(error.message, " is the rror");
+                commit("setLoading", { type: "email", is: false });
+                dispatch(
+                  "controller/initAlert",
+                  {
+                    is: true,
+                    persistence: true,
+                    type: "error",
+                    message: error.message,
+                  },
+                  { root: true }
+                );
+              });
+
+            await db
+              .collection("users")
               .doc(userId)
               .update({
                 email,
@@ -576,7 +609,7 @@ export const actions = {
                 );
               })
               .catch((error) => {
-                // console.log(error.message)
+                console.log(error.message);
                 commit("setLoading", { type: "email", is: false });
                 dispatch(
                   "controller/initAlert",
@@ -591,6 +624,7 @@ export const actions = {
               });
           })
           .catch((error) => {
+            console.log(error.message, " is the error");
             commit("setLoading", { type: "email", is: false });
             dispatch(
               "controller/initAlert",
@@ -605,6 +639,7 @@ export const actions = {
           });
       })
       .catch((error) => {
+        console.log(error.message);
         commit("setLoading", { type: "email", is: false });
         dispatch(
           "controller/initAlert",
