@@ -33,7 +33,10 @@
           <v-card-text class="d-flex">
             <div class="d-flex flex-column">
               <span class="text-subtitle-1 white--text">Dashboard</span>
-              <span class="text-h6 white--text font-weight-light">Welcome, {{ user && user.firstName }} {{ user && user.lastName }}</span>
+              <span
+                class="text-h6 white--text font-weight-light"
+              >Welcome, {{ user && user.firstName }}
+                {{ user && user.lastName }}</span>
             </div>
             <!-- <div v-if="user && user.wallet.earnings !== 0" class="text-h6 text-sm-h4 font-weight-bold white--text my-1">
               {{ user && user.wallet.earnings | currency }}
@@ -123,8 +126,33 @@
                 Market Prices
               </v-card-title>
               <v-card-text class="px-0 pb-0">
-                <div style="height:433px; background-color: #1D2330; overflow:hidden; box-sizing: border-box; border: 1px solid #282E3B; border-radius: 4px; text-align: right; line-height:14px; font-size: 12px; font-feature-settings: normal; text-size-adjust: 100%; box-shadow: inset 0 -20px 0 0 #262B38; padding: 0px; margin: 0px; width: 100%;">
-                  <div style="height:413px; padding:0px; margin:0px; width: 100%;">
+                <div
+                  style="
+                    height: 433px;
+                    background-color: #1d2330;
+                    overflow: hidden;
+                    box-sizing: border-box;
+                    border: 1px solid #282e3b;
+                    border-radius: 4px;
+                    text-align: right;
+                    line-height: 14px;
+                    font-size: 12px;
+                    font-feature-settings: normal;
+                    text-size-adjust: 100%;
+                    box-shadow: inset 0 -20px 0 0 #262b38;
+                    padding: 0px;
+                    margin: 0px;
+                    width: 100%;
+                  "
+                >
+                  <div
+                    style="
+                      height: 413px;
+                      padding: 0px;
+                      margin: 0px;
+                      width: 100%;
+                    "
+                  >
                     <iframe
                       src="https://widget.coinlib.io/widget?type=full_v2&theme=light&cnt=6&pref_coin_id=1505&graph=yes"
                       width="100%"
@@ -134,7 +162,7 @@
                       marginheight="0"
                       frameborder="0"
                       border="0"
-                      style="border:0;margin:0;padding:0;"
+                      style="border: 0; margin: 0; padding: 0"
                     />
                   </div>
                 </div>
@@ -146,7 +174,7 @@
               <v-card-title class="text-subtitle-1 font-weight-medium">
                 Account Information
               </v-card-title>
-              <v-card-text class="text2--text ">
+              <v-card-text class="text2--text">
                 <v-row>
                   <v-col cols="12" class="">
                     Last Access:
@@ -166,7 +194,7 @@
                       {{ ip }}
                     </v-btn>
                   </v-col>
-                  <v-col cols="12" class="textWhite--text ">
+                  <v-col cols="12" class="textWhite--text">
                     Device Browser:
                     <v-btn color="primary" small outlined class="mx-2">
                       <v-icon class="mr-2" small>
@@ -177,18 +205,34 @@
                   </v-col>
                   <v-col cols="12">
                     <v-card dark flat class="bgacc">
-                      <v-card-title class="d-flex flex-column align-start pb-1 text-uppercase">
-                        <div style="width:100%" class="d-flex  text-subtitle-2 transparent">
+                      <v-card-title
+                        class="d-flex flex-column align-start pb-1 text-uppercase"
+                      >
+                        <div
+                          style="width: 100%"
+                          class="d-flex text-subtitle-2 transparent"
+                        >
                           <span>Account Type</span>
                           <v-spacer />
                           <v-chip label small color="accent">
                             {{ user && user.accType }}
                           </v-chip>
                         </div>
-                        <div style="width:100%" class="d-flex mt-2 text-subtitle-2 transparent">
+                        <div
+                          style="width: 100%"
+                          class="d-flex mt-2 text-subtitle-2 transparent"
+                        >
                           <span>Account Status</span>
                           <v-spacer />
-                          <v-chip label small :color="user && (user.accStatus).toLowerCase() === 'active' ? 'success' : 'error'">
+                          <v-chip
+                            label
+                            small
+                            :color="
+                              user && user.accStatus.toLowerCase() === 'active'
+                                ? 'success'
+                                : 'error'
+                            "
+                          >
                             {{ user && user.accStatus }}
                           </v-chip>
                         </div>
@@ -202,7 +246,11 @@
           </v-col>
         </v-row>
       </v-col>
-      <verify-account :user="user" :drawer="drawer.verify" :toggle="toggleVerify" />
+      <verify-account
+        :user="user"
+        :drawer="drawer.verify"
+        :toggle="toggleVerify"
+      />
     </v-row>
   </v-container>
 </template>
@@ -239,7 +287,10 @@ export default {
     browser: ''
   }),
   computed: {
-    ...mapGetters({ user: 'authentication/getUser', state: 'authentication/getState' }),
+    ...mapGetters({
+      user: 'authentication/getUser',
+      state: 'authentication/getState'
+    }),
     verified () {
       let verified = false
       const verification = this.state('verification')
@@ -285,10 +336,8 @@ export default {
           color: 'gpurple',
           amount: this.user && this.user.wallet.referral
         }
-
       ]
     }
-
   },
   created () {
     // get ip
@@ -301,15 +350,16 @@ export default {
     getIp () {
       fetch('https://api.ipify.org?format=json')
         .then(x => x.json())
-        .then(({
-          ip
-        }) => {
+        .then(({ ip }) => {
           this.ip = ip
         })
     },
     getBrowser () {
       try {
-        if ((navigator.userAgent.indexOf('Opera') || navigator.userAgent.indexOf('OPR')) !== -1) {
+        if (
+          (navigator.userAgent.indexOf('Opera') ||
+            navigator.userAgent.indexOf('OPR')) !== -1
+        ) {
           this.browser = 'Opera'
         } else if (navigator.userAgent.includes('Chrome')) {
           this.browser = 'Chrome'
@@ -317,7 +367,10 @@ export default {
           this.browser = 'Safari'
         } else if (navigator.userAgent.includes('Firefox')) {
           this.browser = 'Firefox'
-        } else if ((navigator.userAgent.includes('MSIE')) || (!!document.documentMode === true)) {
+        } else if (
+          navigator.userAgent.includes('MSIE') ||
+          !!document.documentMode === true
+        ) {
           this.browser = 'IE'
         } else {
           this.browser = 'unknown'
@@ -335,7 +388,7 @@ export default {
 
 <style>
 .bgacc {
-  background: rgb(0,11,83);
-background: linear-gradient(36deg, rgb(0, 9, 70) 14%, rgb(0, 18, 133) 87%);
+  background: rgb(0, 11, 83);
+  background: linear-gradient(36deg, rgb(0, 9, 70) 14%, rgb(0, 18, 133) 87%);
 }
 </style>

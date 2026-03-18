@@ -95,6 +95,16 @@
             label="Account Type"
           />
         </v-col>
+        <v-col cols="12">
+          <v-select
+            v-model="displayAccStatus"
+            :items="['Active', 'Inactive']"
+            dense
+            outlined
+            color="primary"
+            label="Account Status"
+          />
+        </v-col>
 
         <v-col cols="12" class="d-flex text-subtitle-2 px-2">
           Advance Settings
@@ -277,6 +287,14 @@ export default {
       },
       set (val) {
         this.user.accType = val
+      }
+    },
+    displayAccStatus: {
+      get () {
+        return (this.user && this.user.accStatus) || 'Inactive'
+      },
+      set (val) {
+        this.user.accStatus = val
       }
     },
     displayBlock: {
