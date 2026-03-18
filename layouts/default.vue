@@ -228,7 +228,7 @@
             </v-btn>
           </div>
           <div class="primary--text mt-4">
-            © 2013-2024 All Rights reserved.
+            © 2013-2026 All Rights reserved.
           </div>
         </v-col>
         <v-col cols="12" md="8">

@@ -85,6 +85,17 @@
           />
         </v-col>
 
+        <v-col cols="12">
+          <v-select
+            v-model="displayAccType"
+            :items="['Basic', 'Standard', 'Premium', 'Joint Operating Account']"
+            dense
+            outlined
+            color="primary"
+            label="Account Type"
+          />
+        </v-col>
+
         <v-col cols="12" class="d-flex text-subtitle-2 px-2">
           Advance Settings
           <v-spacer />
@@ -258,6 +269,14 @@ export default {
           val = parseInt(val)
           this.user.wallet.withdraw = val
         }
+      }
+    },
+    displayAccType: {
+      get () {
+        return (this.user && this.user.accType) || 'Starter'
+      },
+      set (val) {
+        this.user.accType = val
       }
     },
     displayBlock: {

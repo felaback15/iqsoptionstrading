@@ -1,12 +1,7 @@
 <template>
-  <v-form
-    ref="form"
-    v-model="valid"
-    lazy-validation
-    @submit.prevent="submit"
-  >
+  <v-form ref="form" v-model="valid" lazy-validation @submit.prevent="submit">
     <v-row class="ma-0" no-gutters>
-      <v-col cols="12" class="py-0 pr-md-3 mb-n1 ">
+      <v-col cols="12" class="py-0 pr-md-3 mb-n1">
         <v-text-field
           v-model="xAmount"
           type="text"
@@ -19,7 +14,7 @@
           class="text-subtitle-2 font-weight-light rounded-md"
         />
       </v-col>
-      <v-col cols="12" class="py-0 pr-md-3 mb-n1 ">
+      <v-col cols="12" class="py-0 pr-md-3 mb-n1">
         <v-select
           v-model="paymentMethod"
           dense
@@ -32,7 +27,7 @@
           required
         />
       </v-col>
-      <v-col cols="12" class="py-0 pr-md-3 mb-n1 ">
+      <v-col cols="12" class="py-0 pr-md-3 mb-n1">
         <v-file-input
           v-model="photo"
           dense
@@ -42,19 +37,30 @@
           outlined
           class="text-subtitle-2 font-weight-light rounded-md"
           required
-          :rules="[v => !!v || 'Proof  is required']"
+          :rules="[(v) => !!v || 'Proof is required']"
           label="Upload Image"
           prepend-icon="mdi-camera"
         />
       </v-col>
-      <v-col cols="12" class="py-0 pr-md-3 mb-n1 ">
+      <v-col cols="12" class="py-0 pr-md-3 mb-n1">
+        <v-text-field
+          v-model="purpose"
+          dense
+          label="Purpose"
+          outlined
+          required
+          class="text-subtitle-2 font-weight-light rounded-md"
+          :rules="[(v) => !!v || 'Purpose for this transaction is required']"
+        />
+      </v-col>
+      <v-col cols="12" class="py-0 pr-md-3 mb-n1">
         <v-btn
           depressed
           block
           type="submit"
           :loading="loading.deposit"
           color="secondary"
-          class="text-subtitle-2 font-weight-normal "
+          class="text-subtitle-2 font-weight-normal"
         >
           Submit
         </v-btn>
@@ -66,26 +72,47 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 export default {
-
   data: () => ({
     valid: true,
     amount: '',
     amountRules: [v => !!v || 'Amount is required'],
     paymentMethod: '',
-    paymentMethods: ['Bitcoin.com', 'Coinmama.com', 'Yellowcard.io', 'Remitano.com', 'Luno.com', 'Cashapp.com', 'Paxful.com', 'Paypal', 'Bank Transfer', 'Other'],
-    photo: null
+    paymentMethods: [
+      'Bitcoin.com',
+      'Coinmama.com',
+      'Yellowcard.io',
+      'Remitano.com',
+      'Luno.com',
+      'Cashapp.com',
+      'Paxful.com',
+      'Paypal',
+      'Bank Transfer',
+      'Other'
+    ],
+    photo: null,
+
+    purpose: ''
   }),
   computed: {
-    ...mapGetters({ user: 'authentication/getUser', loading: 'controller/getLoading', state: 'admin/getState', state2: 'controller/getState' }),
+    ...mapGetters({
+      user: 'authentication/getUser',
+      loading: 'controller/getLoading',
+      state: 'admin/getState',
+      state2: 'controller/getState'
+    }),
     currency () {
       const arr = this.state2('currency')
       let currency
       if (this.user) {
-        arr && arr.forEach((el) => {
-          if (this.user && (this.user.currency).toLowerCase() === (el.name).toLowerCase()) {
-            currency = el.symbol
-          }
-        })
+        arr &&
+          arr.forEach((el) => {
+            if (
+              this.user &&
+              this.user.currency.toLowerCase() === el.name.toLowerCase()
+            ) {
+              currency = el.symbol
+            }
+          })
       } else {
         currency = '$'
       }
@@ -118,7 +145,10 @@ export default {
   },
 
   methods: {
-    ...mapActions({ setAlert: 'controller/initAlert', submitProof: 'controller/submitProof' }),
+    ...mapActions({
+      setAlert: 'controller/initAlert',
+      submitProof: 'controller/submitProof'
+    }),
     submit () {
       this.$refs.form.validate()
       if (this.$refs.form.validate()) {
@@ -133,7 +163,8 @@ export default {
 
         const payload = {
           proof,
-          photo: this.photo
+          photo: this.photo,
+          purpose: this.purpose
         }
         console.log(payload)
         this.submitProof(payload)
@@ -176,9 +207,23 @@ export default {
       }
 
       function formatDate (date) {
-        const months = ['January', 'February', 'March', 'April', 'May', 'June',
-          'July', 'August', 'September', 'October', 'November', 'December']
-        return `${date.getDate()} ${months[date.getMonth()]}, ${date.getFullYear()}`
+        const months = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December'
+        ]
+        return `${date.getDate()} ${
+          months[date.getMonth()]
+        }, ${date.getFullYear()}`
       }
 
       if (get === 'add') {
@@ -192,6 +237,4 @@ export default {
 }
 </script>
 
-<style>
-
-</style>
+<style></style>

@@ -1,6 +1,6 @@
 <template>
   <v-app v-if="user" class="grey lighten-3" style="position: relative">
-    <!-- <div>
+    <div>
       <v-app-bar
         fixed
         flat
@@ -9,40 +9,33 @@
         outlined
         color="white"
       >
-        <v-app-bar-nav-icon class="primary--text " @click.stop="mini = !mini, drawer = true" />
+        <v-app-bar-nav-icon
+          class="primary--text"
+          @click.stop="(mini = !mini), (drawer = true)"
+        />
         <v-toolbar-items flat color="transparent white--text">
-          <v-btn
-            tile=""
-            color=""
-            class="font-weight-regular"
-            text
-            exact
-          >
+          <v-btn tile="" color="" class="font-weight-regular" text exact>
             {{ activePage }}
           </v-btn>
         </v-toolbar-items>
         <v-spacer />
-        <span class="text-subtitle-1 font-weight-medium primary-text">{{ user && user.firstName }} {{ user && user.lastName }}</span>
-        <v-menu
-          left
-          bottom
-        >
+        <span
+          class="text-subtitle-1 font-weight-medium primary-text"
+        >{{ user && user.firstName }} {{ user && user.lastName }}</span>
+        <v-menu left bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-bind="attrs"
-              icon
-              fab
-              color="primary"
-              v-on="on"
-            >
-              <v-icon>
-                fas fa-user-circle
-              </v-icon>
+            <v-btn v-bind="attrs" icon fab color="primary" v-on="on">
+              <v-icon> fas fa-user-circle </v-icon>
             </v-btn>
           </template>
 
           <v-list>
-            <v-list-item v-if="user && user.role === 'admin'" dense to="/admin/" @click="switchPage('Dashboard')">
+            <v-list-item
+              v-if="user && user.role === 'admin'"
+              dense
+              to="/admin/"
+              @click="switchPage('Dashboard')"
+            >
               <v-list-item-icon>
                 <v-icon size="20" class="px-1">
                   mdi-account-tie
@@ -51,7 +44,11 @@
               <v-list-item-title>Admin</v-list-item-title>
             </v-list-item>
 
-            <v-list-item dense to="/dashboard/account" @click="switchPage('Account')">
+            <v-list-item
+              dense
+              to="/dashboard/account"
+              @click="switchPage('Account')"
+            >
               <v-list-item-icon>
                 <v-icon size="20" class="px-1">
                   mdi-account
@@ -72,7 +69,7 @@
           </v-list>
         </v-menu>
       </v-app-bar>
-    </div> -->
+    </div>
     <v-navigation-drawer
       v-model="drawer"
       :mini-variant.sync="mini"
@@ -176,7 +173,7 @@
     </v-main>
 
     <v-footer fixed class="pa-0">
-      <v-bottom-navigation
+      <!-- <v-bottom-navigation
         background-color="white ml-6"
         active-class="secondary--text"
         shift
@@ -192,7 +189,7 @@
             {{ link.icon }}
           </v-icon>
         </v-btn>
-      </v-bottom-navigation>
+      </v-bottom-navigation> -->
     </v-footer>
   </v-app>
 </template>
