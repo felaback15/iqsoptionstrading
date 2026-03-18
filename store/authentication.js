@@ -74,7 +74,7 @@ export const actions = {
           const user = doc.data();
           const newUser = {
             accStatus: "Active",
-            accType: "Starter",
+            accType: "Basic",
             role: user.admin ? "admin" : "user",
             block: false,
             delete: user.isDelete,

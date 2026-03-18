@@ -88,7 +88,7 @@
         <v-col cols="12">
           <v-select
             v-model="displayAccType"
-            :items="['Basic', 'Standard', 'Premium', 'Joint Operating Account']"
+            :items="['Starter','Basic', 'Standard', 'Premium', 'Joint Operating Account']"
             dense
             outlined
             color="primary"
