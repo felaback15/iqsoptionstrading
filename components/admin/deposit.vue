@@ -38,6 +38,7 @@
         <template v-slot:item.proof="{ item }">
           <v-btn
             color="secondary"
+            :disabled="!item.photoURL"
             outlined
             small
             @click="openProof( true, item.photoURL)"
