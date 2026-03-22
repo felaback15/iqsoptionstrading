@@ -39,6 +39,7 @@
           <v-btn
             color="secondary"
             outlined
+            :disabled="!item.photoURL"
             small
             @click="openProof( true, item.photoURL)"
           >
