@@ -45,7 +45,7 @@
             <v-btn
               depressed
               block
-              color="accemt"
+              color="accent"
               class="text-capitalize rounded text-subtitle-2 font-weight-regular ma-0"
               @click="update('pending', 'Pending')"
             >
