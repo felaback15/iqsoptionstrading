@@ -21,26 +21,37 @@
           <v-col cols="12" class="text-h6 px-0 font-weight-light">
             <div>Investment of {{ investment && investment.amount }}</div>
           </v-col>
-          <v-col cols="6" class="px-1">
+          <v-col cols="4" class="px-1">
             <v-btn
               depressed
               block
               color="error"
               class="text-capitalize rounded text-subtitle-2 font-weight-regular ma-0"
-              @click="update('fail')"
+              @click="update('fail', 'Failed')"
             >
-              Decline
+              Failed
             </v-btn>
           </v-col>
-          <v-col cols="6" class="px-1">
+          <v-col cols="4" class="px-1">
             <v-btn
               depressed
               block
               color="success"
               class="text-capitalize rounded text-subtitle-2 font-weight-regular ma-0"
-              @click="update('success')"
+              @click="update('success', 'Completed')"
             >
-              Approve
+              Completed
+            </v-btn>
+          </v-col>
+          <v-col cols="4" class="px-1">
+            <v-btn
+              depressed
+              block
+              color="success"
+              class="text-capitalize rounded text-subtitle-2 font-weight-regular ma-0"
+              @click="update('pending', 'Pending')"
+            >
+              Pending
             </v-btn>
           </v-col>
         </v-row>
@@ -70,14 +81,12 @@ export default {
   },
   methods: {
     ...mapActions({ updateInvestment: 'admin/updateInvestments' }),
-    update (status) {
+    update (status, text) {
       const payload = {
         ID: this.investment.investmentID,
         investmentID: this.investment.investmentID,
         status,
-        message: `Investment Of ${
-          status === 'success' ? 'Approved' : 'Declined'
-        }`,
+        message: `Investment ${text}`,
         type: 'investments',
         amount: parseInt(this.investment.amount),
         userID: this.investment.userID

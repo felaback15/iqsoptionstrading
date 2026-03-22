@@ -4,7 +4,9 @@
       <v-col cols="12" md="11" class="pa-0">
         <p-container v-if="hasInvestment" dark :color="'primary'" :title="''">
           <div class="d-flex align-center mt-n2">
-            <span class="text-subtitle-1 font-weight-regular text-uppercase">Live Trade</span>
+            <span
+              class="text-subtitle-1 font-weight-regular text-uppercase"
+            >Live Trade</span>
             <v-spacer />
             <v-btn
               depressed
@@ -40,7 +42,9 @@
           >
             <template v-slot:top>
               <v-toolbar flat class="primary darken-1 rounded-lg">
-                <v-toolbar-title class="text-subtitle-2   d-flex font-weight-light text-uppercase">
+                <v-toolbar-title
+                  class="text-subtitle-2 d-flex font-weight-light text-uppercase"
+                >
                   Trades
                 </v-toolbar-title>
                 <v-divider class="mx-4" inset vertical />
@@ -57,12 +61,16 @@
                   single-line
                   hide-details
                 />
-              <!-- <v-spacer></v-spacer>
+                <!-- <v-spacer></v-spacer>
                         <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">New Investment</v-btn> -->
               </v-toolbar>
             </template>
             <template v-slot:item.status="{ item }">
-              <v-chip small :color="getColor(item.status)" class="text-uppercase">
+              <v-chip
+                small
+                :color="getColor(item.status)"
+                class="text-uppercase"
+              >
                 {{ item.status }}
               </v-chip>
             </template>
@@ -72,7 +80,7 @@
                 color="secondary"
                 outlined
                 small
-                @click="openView( true, item)"
+                @click="openView(true, item)"
               >
                 view
               </v-btn>
@@ -91,80 +99,89 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import plan from '~/components/investments/plan.vue'
-import PTrade from '~/components/investments/pTrade.vue'
-import PContainer from '~/components/other/pContainer.vue'
+/* eslint-disable */
+import { mapGetters } from "vuex";
+import plan from "~/components/investments/plan.vue";
+import PTrade from "~/components/investments/pTrade.vue";
+import PContainer from "~/components/other/pContainer.vue";
 export default {
-  name: 'Investment',
+  name: "Investment",
   components: { plan, PContainer, PTrade },
-  layout: 'dashboard',
+  layout: "dashboard",
 
   data: () => ({
     showLive: false,
     hasInvestment: false,
-    search: '',
+    search: "",
     headers: [
       {
-        text: 'Amount',
-        align: 'start',
+        text: "Amount",
+        align: "start",
         sortable: false,
-        value: 'displayAmount'
+        value: "displayAmount",
       },
       {
-        text: 'Plan',
-        value: 'plan'
-      },
-
-      {
-        text: 'Start Date',
-        value: 'date'
-      },
-      {
-        text: 'Maturity Date',
-        value: 'maturityDate'
+        text: "Plan",
+        value: "plan",
       },
 
       {
-        text: 'Status',
-        value: 'status'
-      }
-    ]
+        text: "Start Date",
+        value: "date",
+      },
+      {
+        text: "Maturity Date",
+        value: "maturityDate",
+      },
+
+      {
+        text: "Status",
+        value: "status",
+      },
+    ],
   }),
   computed: {
-    ...mapGetters({ loading: 'controller/getLoading', state: 'controller/getState', user: 'authentication/getUser' }),
-    investments () {
-      const arr = this.state('investments')
+    ...mapGetters({
+      loading: "controller/getLoading",
+      state: "controller/getState",
+      user: "authentication/getUser",
+    }),
+    investments() {
+      const arr = this.state("investments");
       arr.forEach((el) => {
-        el.displayAmount = `${this.user && this.user.symbol}${(el.amount).toLocaleString()}`
-        if (el.status === 'ongoing') {
-          this.hasInvestment = true
+        el.displayAmount = `${
+          this.user && this.user.symbol
+        }${el.amount.toLocaleString()}`;
+        if (el.status === "ongoing") {
+          this.hasInvestment = true;
         }
-      })
+      });
 
-      return arr
-    }
+      return arr;
+    },
   },
   methods: {
-    getColor (type) {
-      if (type && type.toLowerCase() === 'fail') {
-        return 'error'
-      } else if ((type && type.toLowerCase() === 'completed') || (type && type.toLowerCase() === 'success')) {
-        return 'success'
-      } else if (type && type.toLowerCase() === 'ongoing') {
-        return 'warning'
+    getColor(type) {
+      if (type && type.toLowerCase() === "fail") {
+        return "error";
+      } else if (
+        (type && type.toLowerCase() === "completed") ||
+        (type && type.toLowerCase() === "success")
+      ) {
+        return "success";
+      } else if (type && type.toLowerCase() === "pending") {
+        return "accent";
+      } else if (type && type.toLowerCase() === "ongoing") {
+        return "warning";
       } else {
-        return type
+        return type;
       }
     },
-    toggleLive (state) {
-      this.showLive = state
-    }
-  }
-
-}
+    toggleLive(state) {
+      this.showLive = state;
+    },
+  },
+};
 </script>
 
-<style>
-
-</style>
+<style></style>

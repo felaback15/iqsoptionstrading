@@ -134,13 +134,12 @@ export default {
     getColor (type) {
       if (type && type.toLowerCase() === 'fail') {
         return 'error'
-      } else if (
-        (type && type.toLowerCase() === 'success') ||
-        (type && type.toLowerCase() === 'success')
-      ) {
+      } else if (type && type.toLowerCase() === 'success') {
         return 'success'
       } else if (type && type.toLowerCase() === 'ongoing') {
         return 'warning'
+      } else if (type && type.toLowerCase() === 'pending') {
+        return 'accent'
       } else {
         return type
       }
