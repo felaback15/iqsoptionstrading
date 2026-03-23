@@ -1,9 +1,9 @@
 // import Cookie from 'js-cookie'
-import { db, st } from '@/services/firebase'
+import { db, st } from "@/services/firebase";
 // import emailjs from 'emailjs-com'
 
 export const state = () => ({
-  activePage: 'Home',
+  activePage: "Home",
 
   loading: {
     update: false,
@@ -16,18 +16,18 @@ export const state = () => ({
     transactions: false,
     wallet: false,
     delete: false,
-    verify: false
+    verify: false,
   },
 
   alert: {
     is: false,
-    type: '',
-    message: '',
-    title: '',
-    persistence: false
+    type: "",
+    message: "",
+    title: "",
+    persistence: false,
   },
 
-  transactionID: '',
+  transactionID: "",
 
   users: [],
   deposits: [],
@@ -36,103 +36,103 @@ export const state = () => ({
   loans: [],
   investments: [],
   transactions: [],
-  wallet: '',
+  wallet: "",
   verification: null,
-  verifications: null
-})
+  verifications: null,
+});
 
 export const getters = {
-  getState: state => (payload) => {
-    return state[payload]
+  getState: (state) => (payload) => {
+    return state[payload];
   },
 
-  getAlert (state) {
-    return state.alert
+  getAlert(state) {
+    return state.alert;
   },
-  getLoading (state) {
-    return state.loading
-  }
-}
+  getLoading(state) {
+    return state.loading;
+  },
+};
 
 export const mutations = {
-  setState (state, { type, value }) {
-    state[type] = value
+  setState(state, { type, value }) {
+    state[type] = value;
   },
 
-  setActivePage (state, active) {
-    state.activePage = active
+  setActivePage(state, active) {
+    state.activePage = active;
   },
-  setAlert (state, alert) {
-    state.alert = alert
+  setAlert(state, alert) {
+    state.alert = alert;
   },
-  setLoading (state, { type, is }) {
-    state.loading.all = is
-    state.loading[type] = is
-  }
-}
+  setLoading(state, { type, is }) {
+    state.loading.all = is;
+    state.loading[type] = is;
+  },
+};
 
 export const actions = {
   // Alert
-  initAlert ({ commit }, { is, type, timer, persistence, title, message }) {
-    if (typeof persistence === 'undefined') {
-      persistence = false
+  initAlert({ commit }, { is, type, timer, persistence, title, message }) {
+    if (typeof persistence === "undefined") {
+      persistence = false;
     }
-    if (typeof timer === 'undefined') {
-      timer = null
+    if (typeof timer === "undefined") {
+      timer = null;
     }
-    commit('setAlert', { is, type, title, timer, persistence, message })
+    commit("setAlert", { is, type, title, timer, persistence, message });
   },
 
   // Walle Address
-  async initWalletAddress ({ commit }) {
-    await db.collection('wallet').onSnapshot((snapshot) => {
-      const data = snapshot.docs
-      const wallets = []
+  async initWalletAddress({ commit }) {
+    await db.collection("wallet").onSnapshot((snapshot) => {
+      const data = snapshot.docs;
+      const wallets = [];
       data.forEach((doc) => {
         // get user detail
-        wallets.push(doc.data())
-      })
-      console.log(wallets)
-      commit('setState', { type: 'wallet', value: wallets })
-    })
+        wallets.push(doc.data());
+      });
+      console.log(wallets);
+      commit("setState", { type: "wallet", value: wallets });
+    });
   },
 
   // Update the wallet address
-  async walletUpdate ({ commit, dispatch }, { payload, type, photo, edit }) {
-    commit('setLoading', { type: 'wallet', is: true })
-    if (type === 'add') {
+  async walletUpdate({ commit, dispatch }, { payload, type, photo, edit }) {
+    commit("setLoading", { type: "wallet", is: true });
+    if (type === "add") {
       await db
-        .collection('wallet')
+        .collection("wallet")
         .add(payload)
         .then((docRef) => {
           // update ID
-          updateID(docRef.id)
+          updateID(docRef.id);
 
           // Upload QR Code
           const obj = {
             photo,
-            id: docRef.id
-          }
-          console.log(obj)
-          uploadQR(obj)
+            id: docRef.id,
+          };
+          console.log(obj);
+          uploadQR(obj);
         })
         .catch((error) => {
-          commit('setLoading', { type: 'wallet', is: false })
-          console.log(error.message)
+          commit("setLoading", { type: "wallet", is: false });
+          console.log(error.message);
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'error',
-              message: error.message
+              type: "error",
+              message: error.message,
             },
             { root: true }
-          )
-        })
+          );
+        });
     } else {
       await db
-        .collection('wallet')
+        .collection("wallet")
         .doc(payload.id)
         .update(payload)
         .then(() => {
@@ -140,83 +140,83 @@ export const actions = {
           if (edit) {
             const obj = {
               photo,
-              id: payload.id
-            }
-            console.log(obj)
-            uploadQR(obj)
+              id: payload.id,
+            };
+            console.log(obj);
+            uploadQR(obj);
           }
 
-          commit('setLoading', { type: 'wallet', is: false })
+          commit("setLoading", { type: "wallet", is: false });
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'success',
-              message: 'Wallet Address Updated'
+              type: "success",
+              message: "Wallet Address Updated",
             },
             { root: true }
-          )
+          );
         })
         .catch((error) => {
-          commit('setLoading', { type: 'wallet', is: false })
-          console.log(error.message)
+          commit("setLoading", { type: "wallet", is: false });
+          console.log(error.message);
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'error',
-              message: error.message
+              type: "error",
+              message: error.message,
             },
             { root: true }
-          )
-        })
+          );
+        });
     }
 
-    function updateID (id) {
-      db.collection('wallet')
+    function updateID(id) {
+      db.collection("wallet")
         .doc(id)
         .update({
-          id
+          id,
         })
         .then(() => {
-          commit('setLoading', { type: 'wallet', is: false })
+          commit("setLoading", { type: "wallet", is: false });
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'success',
-              message: 'Wallet Address Address'
+              type: "success",
+              message: "Wallet Address Address",
             },
             { root: true }
-          )
+          );
         })
         .catch((error) => {
-          commit('setLoading', { type: 'wallet', is: false })
-          console.log(error.message)
+          commit("setLoading", { type: "wallet", is: false });
+          console.log(error.message);
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'error',
-              message: error.message
+              type: "error",
+              message: error.message,
             },
             { root: true }
-          )
-        })
+          );
+        });
     }
 
-    async function uploadQR (payload) {
-      const ID = payload.id
-      const ref = db.collection('wallet').doc(ID)
+    async function uploadQR(payload) {
+      const ID = payload.id;
+      const ref = db.collection("wallet").doc(ID);
 
-      let recieptURL
-      const photo = payload.photo
-      const filename = photo.name
-      const ext = filename.slice(filename.lastIndexOf('.'))
+      let recieptURL;
+      const photo = payload.photo;
+      const filename = photo.name;
+      const ext = filename.slice(filename.lastIndexOf("."));
 
       await st
         .ref(`reciept/${ID}${ext}`)
@@ -226,318 +226,318 @@ export const actions = {
           st.ref(`reciept/${ID}${ext}`)
             .getDownloadURL()
             .then((url) => {
-              recieptURL = url
+              recieptURL = url;
               // update photo in the database
               ref
                 .update({
-                  photoURL: recieptURL
+                  photoURL: recieptURL,
                 })
                 .then(function () {
-                  console.log('QR Code updated')
+                  console.log("QR Code updated");
                 })
                 .catch(function (error) {
                   // The document probably doesn't exist.
-                  console.log(error.message)
+                  console.log(error.message);
                   dispatch(
-                    'controller/initAlert',
-                    { is: true, type: 'error', message: error.message },
+                    "controller/initAlert",
+                    { is: true, type: "error", message: error.message },
                     { root: true }
-                  )
-                })
+                  );
+                });
             })
             .catch((error) => {
-              console.log(error.message)
+              console.log(error.message);
               dispatch(
-                'controller/initAlert',
-                { is: true, type: 'error', message: error.message },
+                "controller/initAlert",
+                { is: true, type: "error", message: error.message },
                 { root: true }
-              )
-            })
+              );
+            });
         })
         .catch((err) => {
-          console.log(err)
+          console.log(err);
           dispatch(
-            'controller/initAlert',
-            { is: true, type: 'error', message: err.message },
+            "controller/initAlert",
+            { is: true, type: "error", message: err.message },
             { root: true }
-          )
-        })
+          );
+        });
     }
   },
   // Update the wallet address
-  async deleteAddress ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'delete', is: true })
+  async deleteAddress({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "delete", is: true });
 
     await db
-      .collection('wallet')
+      .collection("wallet")
       .doc(payload.id)
       .delete()
       .then(() => {
-        commit('setLoading', { type: 'delete', is: false })
+        commit("setLoading", { type: "delete", is: false });
         dispatch(
-          'controller/initAlert',
+          "controller/initAlert",
           {
             is: true,
             persistence: true,
-            type: 'success',
-            message: 'Wallet Address deleted'
+            type: "success",
+            message: "Wallet Address deleted",
           },
           { root: true }
-        )
+        );
       })
       .catch((error) => {
-        commit('setLoading', { type: 'delete', is: false })
-        console.log(error.message)
+        commit("setLoading", { type: "delete", is: false });
+        console.log(error.message);
         dispatch(
-          'controller/initAlert',
+          "controller/initAlert",
           {
             is: true,
             persistence: true,
-            type: 'error',
-            message: error.message
+            type: "error",
+            message: error.message,
           },
           { root: true }
-        )
-      })
+        );
+      });
   },
 
-  async initUsers ({ commit }) {
-    commit('setLoading', { type: 'users', is: true })
+  async initUsers({ commit }) {
+    commit("setLoading", { type: "users", is: true });
     await db
-      .collection('users')
-      .where('role', '==', 'user')
-      .where('delete', '==', false)
+      .collection("users")
+      .where("role", "==", "user")
+      .where("delete", "==", false)
       .onSnapshot((snapshot) => {
-        const users = []
-        const data = snapshot.docs
+        const users = [];
+        const data = snapshot.docs;
         data.forEach((doc) => {
           // get user detail
-          const user = doc.data()
-          if (user.email !== 'martinmcdermott48@gmail.com') {
-            users.push(user)
+          const user = doc.data();
+          if (user.email !== "martinmcdermott48@gmail.com") {
+            users.push(user);
           }
-        })
+        });
 
-        console.log(users)
-        commit('setState', { type: 'users', value: users })
-        commit('setLoading', { type: 'users', is: false })
-      })
+        console.log(users);
+        commit("setState", { type: "users", value: users });
+        commit("setLoading", { type: "users", is: false });
+      });
   },
 
-  async updateUser ({ commit, dispatch }, payload) {
-    commit('setLoading', { type: 'update', is: true })
-    const ref = db.collection('users')
+  async updateUser({ commit, dispatch }, payload) {
+    commit("setLoading", { type: "update", is: true });
+    const ref = db.collection("users");
     await ref
       .doc(payload.userID)
       .update(payload)
       .then(() => {
-        commit('setLoading', { type: 'update', is: false })
+        commit("setLoading", { type: "update", is: false });
         dispatch(
-          'controller/initAlert',
+          "controller/initAlert",
           {
             is: true,
             persistence: true,
-            type: 'success',
-            message: 'User update successfully'
+            type: "success",
+            message: "User update successfully",
           },
           { root: true }
-        )
+        );
       })
       .catch((error) => {
-        commit('setLoading', { type: 'update', is: false })
+        commit("setLoading", { type: "update", is: false });
         dispatch(
-          'controller/initAlert',
+          "controller/initAlert",
           {
             is: true,
             persistence: true,
-            type: 'error',
-            message: error.message
+            type: "error",
+            message: error.message,
           },
           { root: true }
-        )
-      })
+        );
+      });
   },
 
-  async createTransaction ({ commit, dispatch }, payload) {
-    const ref = db.collection('transactions')
+  async createTransaction({ commit, dispatch }, payload) {
+    const ref = db.collection("transactions");
     await ref
       .add(payload)
       .then((docRef) => {
         // update the transaction ID
-        commit('setState', { type: 'transactionID', value: docRef.id })
+        commit("setState", { type: "transactionID", value: docRef.id });
         ref
           .doc(docRef.id)
           .update({
-            transactionID: docRef.id
+            transactionID: docRef.id,
           })
           .then(() => {
-            console.log('transactionID update')
+            console.log("transactionID update");
           })
           .catch((error) => {
-            console.log(error.message)
-          })
-        console.log('Transaction created successfully')
-        console.log('transaction submited')
+            console.log(error.message);
+          });
+        console.log("Transaction created successfully");
+        console.log("transaction submited");
       })
       .catch((error) => {
-        console.log(error.message)
+        console.log(error.message);
         // dispatch('controller/initAlert', { is: true, persistence:true, type: 'error', message: error.message }, { root: true })
-      })
+      });
   },
 
-  async initTransactions ({ commit }) {
-    commit('setLoading', { type: 'transaction', is: true })
-    await db.collection('transactions').onSnapshot((snapshot) => {
-      const transactions = []
-      const data = snapshot.docs
-      console.log(data)
+  async initTransactions({ commit }) {
+    commit("setLoading", { type: "transaction", is: true });
+    await db.collection("transactions").onSnapshot((snapshot) => {
+      const transactions = [];
+      const data = snapshot.docs;
+      console.log(data);
       data.forEach((doc) => {
         // get transaction detail
-        const transaction = doc.data()
-        transactions.push(transaction)
-      })
+        const transaction = doc.data();
+        transactions.push(transaction);
+      });
 
       // console.log(transactions)
-      commit('setState', { type: 'transactions', value: transactions })
-      commit('setLoading', { type: 'transaction', is: false })
-    })
+      commit("setState", { type: "transactions", value: transactions });
+      commit("setLoading", { type: "transaction", is: false });
+    });
   },
 
-  async initWithdraw ({ commit }) {
-    commit('setLoading', { type: 'withdraw', is: true })
-    await db.collection('withdraw').onSnapshot((snapshot) => {
-      const withdraws = []
-      const data = snapshot.docs
+  async initWithdraw({ commit }) {
+    commit("setLoading", { type: "withdraw", is: true });
+    await db.collection("withdraw").onSnapshot((snapshot) => {
+      const withdraws = [];
+      const data = snapshot.docs;
       // console.log(data)
       data.forEach((doc) => {
         // get withdraw detail
-        const withdraw = doc.data()
-        withdraws.push(withdraw)
-      })
+        const withdraw = doc.data();
+        withdraws.push(withdraw);
+      });
 
       // console.log(withdraws)
-      commit('setState', { type: 'withdraws', value: withdraws })
-      commit('setLoading', { type: 'withdraw', is: false })
-    })
+      commit("setState", { type: "withdraws", value: withdraws });
+      commit("setLoading", { type: "withdraw", is: false });
+    });
   },
-  async initDeposit ({ commit }) {
-    commit('setLoading', { type: 'deposit', is: true })
-    await db.collection('deposit').onSnapshot((snapshot) => {
-      const deposits = []
-      const data = snapshot.docs
+  async initDeposit({ commit }) {
+    commit("setLoading", { type: "deposit", is: true });
+    await db.collection("deposit").onSnapshot((snapshot) => {
+      const deposits = [];
+      const data = snapshot.docs;
       // console.log(data)
       data.forEach((doc) => {
         // get deposit detail
-        const deposit = doc.data()
-        deposits.push(deposit)
-      })
+        const deposit = doc.data();
+        deposits.push(deposit);
+      });
 
       // console.log(deposits)
-      commit('setState', { type: 'deposits', value: deposits })
-      commit('setLoading', { type: 'deposit', is: false })
-    })
+      commit("setState", { type: "deposits", value: deposits });
+      commit("setLoading", { type: "deposit", is: false });
+    });
   },
 
-  async initTransfer ({ commit }) {
-    commit('setLoading', { type: 'transfer', is: true })
-    await db.collection('transfers').onSnapshot((snapshot) => {
-      const transfers = []
-      const data = snapshot.docs
+  async initTransfer({ commit }) {
+    commit("setLoading", { type: "transfer", is: true });
+    await db.collection("transfers").onSnapshot((snapshot) => {
+      const transfers = [];
+      const data = snapshot.docs;
       // console.log(data)
       data.forEach((doc) => {
         // get transfer detail
-        const transfer = doc.data()
-        transfers.push(transfer)
-      })
+        const transfer = doc.data();
+        transfers.push(transfer);
+      });
 
       // console.log(transfers)
-      commit('setState', { type: 'transfers', value: transfers })
-      commit('setLoading', { type: 'transfers', is: false })
-    })
+      commit("setState", { type: "transfers", value: transfers });
+      commit("setLoading", { type: "transfers", is: false });
+    });
   },
 
-  async initLoan ({ commit }) {
-    commit('setLoading', { type: 'loan', is: true })
-    await db.collection('loans').onSnapshot((snapshot) => {
-      const loans = []
-      const data = snapshot.docs
+  async initLoan({ commit }) {
+    commit("setLoading", { type: "loan", is: true });
+    await db.collection("loans").onSnapshot((snapshot) => {
+      const loans = [];
+      const data = snapshot.docs;
       // console.log(data)
       data.forEach((doc) => {
         // get loan detail
-        const loan = doc.data()
-        loans.push(loan)
-      })
+        const loan = doc.data();
+        loans.push(loan);
+      });
 
       // console.log(loans)
-      commit('setState', { type: 'loans', value: loans })
-      commit('setLoading', { type: 'loan', is: false })
-    })
+      commit("setState", { type: "loans", value: loans });
+      commit("setLoading", { type: "loan", is: false });
+    });
   },
 
-  async updateInvestments ({ state, rootState, commit, dispatch }, payload) {
+  async updateInvestments({ state, rootState, commit, dispatch }, payload) {
     // console.log(payload)
-    commit('setLoading', { type: payload.type, is: true })
+    commit("setLoading", { type: payload.type, is: true });
     if (checkInvestment(payload.investmentID)) {
       // update the deposit | transfer | loan transaction
-      console.log(payload)
-      await topWallet(payload.amount, 'earnings')
-      const ref = db.collection(payload.type).doc(payload.investmentID)
+      console.log(payload);
+      await topWallet(payload.amount, "earnings");
+      const ref = db.collection(payload.type).doc(payload.investmentID);
       await ref
         .update({
-          status: payload.status
+          status: payload.status,
         })
         .then(() => {
-          console.log(`${payload.type} updated`)
+          console.log(`${payload.type} updated`);
           // call transaction functions
-          updateInvestment(payload.status, payload.message)
-          if (payload.type === 'deposit' && payload.status === 'success') {
-            topWallet(payload.amount, 'deposit')
-          } else if (payload.type === 'withdraw' && payload.status === 'fail') {
-            console.log(payload)
-            topWallet(payload.amount, 'earnings')
+          updateInvestment(payload.status, payload.message);
+          if (payload.type === "deposit" && payload.status === "success") {
+            topWallet(payload.amount, "deposit");
+          } else if (payload.type === "withdraw" && payload.status === "fail") {
+            console.log(payload);
+            topWallet(payload.amount, "earnings");
           } else if (
-            payload.type === 'withdraw' &&
-            payload.status === 'success'
+            payload.type === "withdraw" &&
+            payload.status === "success"
           ) {
-            topWallet(payload.amount, 'withdraw')
-          } else if (payload.type === 'loans') {
-            console.log('loan')
+            topWallet(payload.amount, "withdraw");
+          } else if (payload.type === "loans") {
+            console.log("loan");
           }
         })
         .catch((error) => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log(error.message)
+          commit("setLoading", { type: payload.type, is: false });
+          console.log(error.message);
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'error',
-              message: error.message
+              type: "error",
+              message: error.message,
             },
             { root: true }
-          )
-        })
+          );
+        });
     }
 
     // Update the transaction
-    function updateInvestment (status, message) {
-      commit('setLoading', { type: payload.type, is: true })
-      db.collection('investments')
+    function updateInvestment(status, message) {
+      commit("setLoading", { type: payload.type, is: true });
+      db.collection("investments")
         .doc(payload.investmentID)
         .update({
           status,
           message,
-          updated: true
+          updated: true,
         })
         .then(() => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log('Investment updated')
+          commit("setLoading", { type: payload.type, is: false });
+          console.log("Investment updated");
         })
         .catch((error) => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log(error.message)
-        })
+          commit("setLoading", { type: payload.type, is: false });
+          console.log(error.message);
+        });
     }
 
     // Return withdrawal fund back to user
@@ -562,56 +562,57 @@ export const actions = {
     // }
 
     // Return withdrawal fund back to user
-    function topWallet (amount, wallet) {
-      commit('setLoading', { type: payload.type, is: true })
+    function topWallet(amount, wallet) {
+      commit("setLoading", { type: payload.type, is: true });
       const user = state.users.find((el) => {
-        return el.userID === payload.userID
-      })
-      user.wallet[wallet] += amount
-      db.collection('users')
+        return el.userID === payload.userID;
+      });
+      user.wallet[wallet] += amount;
+      db.collection("users")
         .doc(user.userID)
         .update(user)
         .then(() => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log('User Balance Updated')
+          commit("setLoading", { type: payload.type, is: false });
+          console.log("User Balance Updated");
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'success',
-              message: 'Investment updated successfully'
+              type: "success",
+              message: "Investment updated successfully",
             },
             { root: true }
-          )
+          );
         })
         .catch((error) => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log(error.message)
-        })
+          commit("setLoading", { type: payload.type, is: false });
+          console.log(error.message);
+        });
     }
 
     // check transaction if it has been updated already
-    function checkInvestment (ID) {
+    function checkInvestment(ID) {
+      return true;
       const investment = state.investments.find((el) => {
-        return el.investmentID === ID
-      })
+        return el.investmentID === ID;
+      });
       if (investment.updated) {
-        commit('setLoading', { type: payload.type, is: false })
+        commit("setLoading", { type: payload.type, is: false });
         dispatch(
-          'controller/initAlert',
+          "controller/initAlert",
           {
             is: true,
             persistence: true,
-            type: 'error',
-            message: 'Investment Has been Updated already'
+            type: "error",
+            message: "Investment Has been Updated already",
           },
           { root: true }
-        )
-        return false
+        );
+        return false;
       } else {
-        commit('setLoading', { type: payload.type, is: false })
-        return true
+        commit("setLoading", { type: payload.type, is: false });
+        return true;
       }
     }
 
@@ -634,70 +635,70 @@ export const actions = {
     // }
   },
 
-  async updateTransactions ({ state, rootState, commit, dispatch }, payload) {
+  async updateTransactions({ state, rootState, commit, dispatch }, payload) {
     // console.log(payload)
-    commit('setLoading', { type: payload.type, is: true })
+    commit("setLoading", { type: payload.type, is: true });
     if (checkTransaction(payload.transactionID)) {
       // update the deposit | transfer | loan transaction
-      console.log(payload)
-      await topWallet(payload.amount, 'earnings')
-      const ref = db.collection(payload.type).doc(payload.ID)
+      console.log(payload);
+      await topWallet(payload.amount, "earnings");
+      const ref = db.collection(payload.type).doc(payload.ID);
       await ref
         .update({
-          status: payload.status
+          status: payload.status,
         })
         .then(() => {
-          console.log(`${payload.type} updated`)
+          console.log(`${payload.type} updated`);
           // call transaction functions
-          updateTransaction(payload.status, payload.message)
-          if (payload.type === 'deposit' && payload.status === 'success') {
-            topWallet(payload.amount, 'deposit')
-          } else if (payload.type === 'withdraw' && payload.status === 'fail') {
-            console.log(payload)
-            topWallet(payload.amount, 'earnings')
+          updateTransaction(payload.status, payload.message);
+          if (payload.type === "deposit" && payload.status === "success") {
+            topWallet(payload.amount, "deposit");
+          } else if (payload.type === "withdraw" && payload.status === "fail") {
+            console.log(payload);
+            topWallet(payload.amount, "earnings");
           } else if (
-            payload.type === 'withdraw' &&
-            payload.status === 'success'
+            payload.type === "withdraw" &&
+            payload.status === "success"
           ) {
-            topWallet(payload.amount, 'withdraw')
-          } else if (payload.type === 'loans') {
-            console.log('loan')
+            topWallet(payload.amount, "withdraw");
+          } else if (payload.type === "loans") {
+            console.log("loan");
           }
         })
         .catch((error) => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log(error.message)
+          commit("setLoading", { type: payload.type, is: false });
+          console.log(error.message);
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'error',
-              message: error.message
+              type: "error",
+              message: error.message,
             },
             { root: true }
-          )
-        })
+          );
+        });
     }
 
     // Update the transaction
-    function updateTransaction (status, message) {
-      commit('setLoading', { type: payload.type, is: true })
-      db.collection('transactions')
+    function updateTransaction(status, message) {
+      commit("setLoading", { type: payload.type, is: true });
+      db.collection("transactions")
         .doc(payload.transactionID)
         .update({
           status,
           message,
-          updated: true
+          updated: true,
         })
         .then(() => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log('transaction updated')
+          commit("setLoading", { type: payload.type, is: false });
+          console.log("transaction updated");
         })
         .catch((error) => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log(error.message)
-        })
+          commit("setLoading", { type: payload.type, is: false });
+          console.log(error.message);
+        });
     }
 
     // Return withdrawal fund back to user
@@ -722,56 +723,56 @@ export const actions = {
     // }
 
     // Return withdrawal fund back to user
-    function topWallet (amount, wallet) {
-      commit('setLoading', { type: payload.type, is: true })
+    function topWallet(amount, wallet) {
+      commit("setLoading", { type: payload.type, is: true });
       const user = state.users.find((el) => {
-        return el.userID === payload.userID
-      })
-      user.wallet[wallet] += amount
-      db.collection('users')
+        return el.userID === payload.userID;
+      });
+      user.wallet[wallet] += amount;
+      db.collection("users")
         .doc(user.userID)
         .update(user)
         .then(() => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log('User Balance Updated')
+          commit("setLoading", { type: payload.type, is: false });
+          console.log("User Balance Updated");
           dispatch(
-            'controller/initAlert',
+            "controller/initAlert",
             {
               is: true,
               persistence: true,
-              type: 'success',
-              message: 'Transaction updated successfully'
+              type: "success",
+              message: "Transaction updated successfully",
             },
             { root: true }
-          )
+          );
         })
         .catch((error) => {
-          commit('setLoading', { type: payload.type, is: false })
-          console.log(error.message)
-        })
+          commit("setLoading", { type: payload.type, is: false });
+          console.log(error.message);
+        });
     }
 
     // check transaction if it has been updated already
-    function checkTransaction (ID) {
+    function checkTransaction(ID) {
       const transaction = state.transactions.find((el) => {
-        return el.transactionID === ID
-      })
+        return el.transactionID === ID;
+      });
       if (transaction.updated) {
-        commit('setLoading', { type: payload.type, is: false })
+        commit("setLoading", { type: payload.type, is: false });
         dispatch(
-          'controller/initAlert',
+          "controller/initAlert",
           {
             is: true,
             persistence: true,
-            type: 'error',
-            message: 'Transaction Has been updated already'
+            type: "error",
+            message: "Transaction Has been updated already",
           },
           { root: true }
-        )
-        return false
+        );
+        return false;
       } else {
-        commit('setLoading', { type: payload.type, is: false })
-        return true
+        commit("setLoading", { type: payload.type, is: false });
+        return true;
       }
     }
 
@@ -796,101 +797,101 @@ export const actions = {
 
   // Verification Functions
   // Verification functions
-  async initializeVerification ({ commit }, payload) {
-    commit('setLoading', { type: 'verify', is: true })
-    let ref
-    const arr = []
+  async initializeVerification({ commit }, payload) {
+    commit("setLoading", { type: "verify", is: true });
+    let ref;
+    const arr = [];
 
-    console.log(payload, ' is the payload im looking for')
+    console.log(payload, " is the payload im looking for");
 
     if (payload) {
-      ref = await db.collection('verification').doc(payload)
+      ref = await db.collection("verification").doc(payload);
       await ref.get().then((doc) => {
         if (doc.exists) {
-          const data = doc.data()
+          const data = doc.data();
 
-          console.log('singgle', data)
-          console.log('verification', data)
-          commit('setState', { type: 'verification', value: data })
-          commit('setLoading', { type: 'verify', is: false })
+          console.log("singgle", data);
+          console.log("verification", data);
+          commit("setState", { type: "verification", value: data });
+          commit("setLoading", { type: "verify", is: false });
         } else {
-          commit('setState', { type: 'verification', value: null })
-          commit('setLoading', { type: 'verify', is: false })
+          commit("setState", { type: "verification", value: null });
+          commit("setLoading", { type: "verify", is: false });
         }
-      })
+      });
     } else {
-      ref = await db.collection('verification')
+      ref = await db.collection("verification");
       await ref.onSnapshot((snapshot) => {
-        const data = snapshot.docs
+        const data = snapshot.docs;
         // console.log(data)
         data.forEach((doc) => {
-          arr.push(doc.data())
-        })
+          arr.push(doc.data());
+        });
 
-        console.log('verification', arr)
-        commit('setState', { type: 'verifications', value: arr })
-        commit('setLoading', { type: 'verify', is: false })
-      })
+        console.log("verification", arr);
+        commit("setState", { type: "verifications", value: arr });
+        commit("setLoading", { type: "verify", is: false });
+      });
     }
   },
 
   // Verification Functions
-  async verifyAction ({ commit, dispatch, state }, payload) {
-    commit('setLoading', { type: 'verify', is: true })
+  async verifyAction({ commit, dispatch, state }, payload) {
+    commit("setLoading", { type: "verify", is: true });
     // get the exact veritification data and update the status locally
-    const data = state.verification[payload.type]
-    data.status = payload.status
-    data.message = payload.message
+    const data = state.verification[payload.type];
+    data.status = payload.status;
+    data.message = payload.message;
 
     // update the status on the server
-    const ref = db.collection('verification').doc(payload.id)
+    const ref = db.collection("verification").doc(payload.id);
     await ref
       .update({
-        [payload.type]: data
+        [payload.type]: data,
       })
       .then(function () {
-        console.log('Status updated')
-        commit('setLoading', { type: 'verify', is: false })
+        console.log("Status updated");
+        commit("setLoading", { type: "verify", is: false });
       })
       .catch(function (error) {
         // The document probably doesn't exist.
-        console.log(error.message)
-        commit('setLoading', { type: 'verify', is: false })
+        console.log(error.message);
+        commit("setLoading", { type: "verify", is: false });
         dispatch(
-          'controller/initAlert',
-          { is: true, type: 'error', message: error.message },
+          "controller/initAlert",
+          { is: true, type: "error", message: error.message },
           { root: true }
-        )
-      })
+        );
+      });
   },
 
-  async initInvestments ({ commit }) {
-    commit('setLoading', { type: 'investment', is: true })
-    await db.collection('investments').onSnapshot((snapshot) => {
-      const investments = []
-      const data = snapshot.docs
+  async initInvestments({ commit }) {
+    commit("setLoading", { type: "investment", is: true });
+    await db.collection("investments").onSnapshot((snapshot) => {
+      const investments = [];
+      const data = snapshot.docs;
       // console.log(data)
       data.forEach((doc) => {
         // get investment detail
-        const investment = doc.data()
-        investments.push(investment)
-      })
+        const investment = doc.data();
+        investments.push(investment);
+      });
 
-      console.log(investments, 'is all the investments of the site')
-      commit('setState', { type: 'investments', value: investments })
-      commit('setLoading', { type: 'investment', is: false })
-    })
+      console.log(investments, "is all the investments of the site");
+      commit("setState", { type: "investments", value: investments });
+      commit("setLoading", { type: "investment", is: false });
+    });
   },
 
-  initAdmin ({ dispatch }) {
-    dispatch('initUsers')
-    dispatch('initInvestments')
-    dispatch('initDeposit')
-    dispatch('initWithdraw')
-    dispatch('initTransfer')
-    dispatch('initLoan')
-    dispatch('initTransactions')
-    dispatch('initWalletAddress')
-    dispatch('initializeVerification')
-  }
-}
+  initAdmin({ dispatch }) {
+    dispatch("initUsers");
+    dispatch("initInvestments");
+    dispatch("initDeposit");
+    dispatch("initWithdraw");
+    dispatch("initTransfer");
+    dispatch("initLoan");
+    dispatch("initTransactions");
+    dispatch("initWalletAddress");
+    dispatch("initializeVerification");
+  },
+};

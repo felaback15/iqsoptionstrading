@@ -3,7 +3,7 @@
     <v-card
       :loading="loading.investment"
       flat
-      max-width="600"
+      max-width="400"
       class="mx-auto"
       elevation="0"
     >
@@ -19,7 +19,7 @@
           <v-col cols="12" class="text-h6 px-0 font-weight-light">
             <div>Investment of {{ investment && investment.amount }}</div>
           </v-col>
-          <v-col cols="3" class="px-1">
+          <v-col cols="3" sm="6" class="px-1">
             <v-btn
               depressed
               block
@@ -30,7 +30,7 @@
               Completed
             </v-btn>
           </v-col>
-          <v-col cols="3" class="px-1">
+          <v-col cols="3" sm="6" class="px-1">
             <v-btn
               depressed
               block
@@ -41,7 +41,7 @@
               Failed
             </v-btn>
           </v-col>
-          <v-col cols="3" class="px-1">
+          <v-col cols="3" sm="6" class="px-1">
             <v-btn
               depressed
               block
@@ -52,11 +52,11 @@
               Pending
             </v-btn>
           </v-col>
-          <v-col cols="3" class="px-1">
+          <v-col cols="3" sm="6" class="px-1">
             <v-btn
               depressed
               block
-              color="warning"
+              color="#E4D421FF"
               class="text-capitalize rounded text-subtitle-2 font-weight-regular ma-0"
               @click="update('ongoing', 'Ongoing')"
             >
