@@ -11,7 +11,9 @@
         Action
         <v-spacer />
         <v-btn small outlined icon @click="toggle(false, {})">
-          <v-icon size="20"> mdi-close </v-icon>
+          <v-icon size="20">
+            mdi-close
+          </v-icon>
         </v-btn>
       </v-card-title>
       <v-card-text class="">
@@ -70,53 +72,53 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions } from 'vuex'
 export default {
   props: {
     investment: Object,
     modal: {
       type: Boolean,
-      default: false,
+      default: false
     },
     toggle: {
-      type: Function,
-    },
+      type: Function
+    }
   },
   data: () => ({
-    size: 70,
+    size: 70
   }),
   computed: {
-    ...mapGetters({ loading: "admin/getLoading" }),
+    ...mapGetters({ loading: 'admin/getLoading' })
   },
   methods: {
-    ...mapActions({ updateInvestment: "admin/updateInvestments" }),
-    update(status, text) {
+    ...mapActions({ updateInvestment: 'admin/updateInvestments' }),
+    update (status, text) {
       const payload = {
         ID: this.investment.investmentID,
         investmentID: this.investment.investmentID,
         status,
         message: `Investment ${text}`,
-        type: "investments",
+        type: 'investments',
         amount: parseInt(this.investment.amount),
-        userID: this.investment.userID,
-      };
+        userID: this.investment.userID
+      }
 
-      console.log(payload, status, "what im looking for");
-      this.updateInvestment(payload);
-      this.checkIfDone();
+      console.log(payload, status, 'what im looking for')
+      this.updateInvestment(payload)
+      this.checkIfDone()
     },
-    checkIfDone() {
+    checkIfDone () {
       setInterval(() => {
         if (!this.loading.investment) {
           setTimeout(() => {
-            this.toggle(false, {});
-            window.location.reload();
-          }, 2000);
+            this.toggle(false, {})
+            window.location.reload()
+          }, 2000)
         }
-      }, 1000);
-    },
-  },
-};
+      }, 1000)
+    }
+  }
+}
 </script>
 
 <style></style>
