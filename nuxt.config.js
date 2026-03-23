@@ -151,7 +151,7 @@ export default {
           text2: "#373F53",
           light: "#F2F2F2",
           info: colors.teal.lighten1,
-          warning: "#FFEA00FF",
+          warning: "#D5B60A",
           error: "#EB5757",
           success: "#0FC236",
         },
