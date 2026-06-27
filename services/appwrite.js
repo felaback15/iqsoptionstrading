@@ -14,7 +14,7 @@
 
 /* eslint-disable */
 
-// changed it to appwrite em
+// note: changed it to appwrite em
 const appWriteConfig = {
   endpoint: "https://cloud.appwrite.io/v1",
   project_id: "6a03a2500039ddd0f5ee",
